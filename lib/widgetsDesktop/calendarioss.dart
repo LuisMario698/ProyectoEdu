@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'actividad_modelo.dart';
 
 class CalendarioWidget extends StatefulWidget {
   const CalendarioWidget({super.key});
@@ -8,124 +9,76 @@ class CalendarioWidget extends StatefulWidget {
   State<CalendarioWidget> createState() => _CalendarioWidgetState();
 }
 
-class Evento {
-  final String titulo;
-  final String categoria;
-
-  Evento(this.titulo, this.categoria);
-}
-
 class _CalendarioWidgetState extends State<CalendarioWidget> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  final Map<DateTime, List<Evento>> _eventos = {};
-  final Set<String> _completados = {};
 
-  final List<String> _categorias = ['Tarea', 'Examen', 'Reunión', 'Otro'];
-
-  List<Evento> _getEventosParaDia(DateTime day) {
-    return _eventos[DateTime(day.year, day.month, day.day)] ?? [];
+  List<Actividad> _getEventosParaDia(DateTime day) {
+    return listaActividades.where((a) =>
+      a.fecha.year == day.year &&
+      a.fecha.month == day.month &&
+      a.fecha.day == day.day
+    ).toList();
   }
 
-  Color _colorCategoria(String categoria) {
-    switch (categoria) {
-      case 'Tarea':
-        return Colors.blue.shade100;
-      case 'Examen':
-        return Colors.red.shade100;
-      case 'Reunión':
-        return Colors.purple.shade100;
-      default:
-        return Colors.grey.shade300;
-    }
+  void _marcarComoEntregada(Actividad actividad) {
+    setState(() {
+      actividad.entregada = true;
+    });
   }
 
-  void _mostrarDialogoAgregar({Evento? eventoExistente, int? indexEditar}) {
-    final TextEditingController tituloCtrl = TextEditingController(text: eventoExistente?.titulo ?? '');
-    String categoriaSeleccionada = eventoExistente?.categoria ?? _categorias[0];
+  void _mostrarDialogoAgregarEvento() {
+    final TextEditingController tituloCtrl = TextEditingController();
+    final TextEditingController descripcionCtrl = TextEditingController();
+    final TextEditingController materiaCtrl = TextEditingController();
 
     showDialog(
       context: context,
-      builder: (_) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(eventoExistente == null ? "📝 Agregar Evento" : "✏️ Editar Evento"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: tituloCtrl,
-                decoration: const InputDecoration(
-                  hintText: 'Ej. Entregar tarea de matemáticas',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.event),
-                ),
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                value: categoriaSeleccionada,
-                items: _categorias
-                    .map((c) => DropdownMenuItem(
-                          value: c,
-                          child: Text(c),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() => categoriaSeleccionada = value);
-                  }
-                },
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Categoría',
-                ),
-              )
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancelar"),
+      builder: (context) => AlertDialog(
+        title: const Text('Nuevo Evento'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: tituloCtrl,
+              decoration: const InputDecoration(labelText: 'Título'),
             ),
-            ElevatedButton.icon(
-              onPressed: () {
-                if (_selectedDay != null && tituloCtrl.text.isNotEmpty) {
-                  final fecha = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
-                  final nuevoEvento = Evento(tituloCtrl.text, categoriaSeleccionada);
-
-                  setState(() {
-                    if (indexEditar != null) {
-                      _eventos[fecha]![indexEditar] = nuevoEvento;
-                    } else {
-                      _eventos[fecha] = [..._getEventosParaDia(fecha), nuevoEvento];
-                    }
-                  });
-                }
-                Navigator.pop(context);
-              },
-              icon: Icon(eventoExistente == null ? Icons.add : Icons.save),
-              label: Text(eventoExistente == null ? "Agregar" : "Guardar"),
+            TextField(
+              controller: descripcionCtrl,
+              decoration: const InputDecoration(labelText: 'Descripción'),
+            ),
+            TextField(
+              controller: materiaCtrl,
+              decoration: const InputDecoration(labelText: 'Categoría (Ej. Reunión)'),
             ),
           ],
-        );
-      },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (tituloCtrl.text.isNotEmpty && _selectedDay != null) {
+                setState(() {
+                  listaActividades.add(
+                    Actividad(
+                      titulo: tituloCtrl.text,
+                      descripcion: descripcionCtrl.text,
+                      materia: materiaCtrl.text,
+                      fecha: _selectedDay!,
+                    ),
+                  );
+                });
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Agregar'),
+          ),
+        ],
+      ),
     );
-  }
-
-  void _marcarComoEntregado(DateTime fecha, Evento evento) {
-    setState(() {
-      _completados.add("${fecha.toIso8601String()}|${evento.titulo}");
-    });
-  }
-
-  void _eliminarEvento(DateTime fecha, int index) {
-    setState(() {
-      _eventos[fecha]?.removeAt(index);
-    });
-  }
-
-  bool _estaCompletado(DateTime fecha, Evento evento) {
-    return _completados.contains("${fecha.toIso8601String()}|${evento.titulo}");
   }
 
   @override
@@ -181,11 +134,20 @@ class _CalendarioWidgetState extends State<CalendarioWidget> {
             ),
             calendarBuilders: CalendarBuilders(
               markerBuilder: (context, date, events) {
-                final fecha = DateTime(date.year, date.month, date.day);
-                if (_eventos.containsKey(fecha)) {
-                  return const Positioned(
-                    bottom: 1,
-                    child: Icon(Icons.event_note, color: Colors.amber, size: 20),
+                final eventos = _getEventosParaDia(date);
+                if (eventos.isNotEmpty) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: eventos.map((e) =>
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: e.entregada ? Colors.green : Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                      )).toList(),
                   );
                 }
                 return null;
@@ -194,26 +156,17 @@ class _CalendarioWidgetState extends State<CalendarioWidget> {
           ),
           const SizedBox(height: 20),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              const Text('Eventos del día:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
               ElevatedButton.icon(
-                onPressed: _selectedDay == null ? null : () => _mostrarDialogoAgregar(),
+                onPressed: _mostrarDialogoAgregarEvento,
                 icon: const Icon(Icons.add),
-                label: const Text("Agregar evento"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.indigo,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
+                label: const Text('Agregar evento'),
               ),
-              const SizedBox(width: 20),
-              if (_selectedDay != null)
-                Text(
-                  "Eventos del ${_selectedDay!.day}/${_selectedDay!.month}/${_selectedDay!.year}",
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
           if (_selectedDay != null)
             Expanded(
               child: _getEventosParaDia(_selectedDay!).isEmpty
@@ -222,48 +175,26 @@ class _CalendarioWidgetState extends State<CalendarioWidget> {
                       itemCount: _getEventosParaDia(_selectedDay!).length,
                       itemBuilder: (context, index) {
                         final evento = _getEventosParaDia(_selectedDay!)[index];
-                        final completado = _estaCompletado(_selectedDay!, evento);
                         return Card(
                           elevation: 3,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          color: completado ? Colors.green[100] : _colorCategoria(evento.categoria),
+                          color: evento.color,
                           child: ListTile(
                             leading: Icon(
-                              completado ? Icons.check_circle : Icons.assignment,
-                              color: completado ? Colors.green : Colors.black54,
+                              evento.entregada ? Icons.check_circle : Icons.pending_actions,
+                              color: evento.entregada ? Colors.green : Colors.orange,
                             ),
                             title: Text(
                               evento.titulo,
-                              style: TextStyle(
-                                fontSize: 18,
-                                decoration: completado ? TextDecoration.lineThrough : null,
-                              ),
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                             ),
-                            subtitle: Text(evento.categoria),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (!completado)
-                                  IconButton(
-                                    icon: const Icon(Icons.check),
-                                    tooltip: "Marcar como entregado",
-                                    onPressed: () => _marcarComoEntregado(_selectedDay!, evento),
-                                  ),
-                                IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  tooltip: "Editar evento",
-                                  onPressed: () => _mostrarDialogoAgregar(
-                                    eventoExistente: evento,
-                                    indexEditar: index,
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete, color: Colors.red),
-                                  tooltip: "Eliminar evento",
-                                  onPressed: () => _eliminarEvento(_selectedDay!, index),
-                                ),
-                              ],
-                            ),
+                            subtitle: Text(evento.materia),
+                            trailing: !evento.entregada
+                                ? TextButton(
+                                    onPressed: () => _marcarComoEntregada(evento),
+                                    child: const Text('Marcar como entregada'),
+                                  )
+                                : const Text('Entregada ✅'),
                           ),
                         );
                       },
