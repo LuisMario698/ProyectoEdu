@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ActividadesWidget extends StatelessWidget {
+  const ActividadesWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(

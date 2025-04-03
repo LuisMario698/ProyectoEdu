@@ -8,7 +8,7 @@ class MateriasWidget extends StatefulWidget {
 }
 
 class _MateriasWidgetState extends State<MateriasWidget> {
-  bool _isSearching = false;
+  final bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
 
   @override

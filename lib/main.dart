@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:responsive_builder/responsive_builder.dart';
-import 'views/mobile/home_mobile.dart';
 import 'views/desktop/home_desktop.dart';
+// para actividades escritorio
+// para materias escritorio
+
+
+
 
 void main() {
   runApp(const MyApp());
@@ -36,6 +39,6 @@ class TeamsScreen extends StatelessWidget {
       },
       */
     //return const HomeMobile();
-    return const HomeMobile();
+    return const HomeDesktop();
   }
 }
