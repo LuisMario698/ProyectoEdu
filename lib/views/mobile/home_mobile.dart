@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:proyectoeducativo/widgets/actividades.dart';
 import '../../widgets/materias.dart'; // Importa el widget de materias
+import '../../widgets/chats.dart'; // Importa el widget de chats
+import '../../widgets/grupos_trabajo.dart'; // Importa el widget de grupos de trabajo
+import '../../widgets/horarios.dart'; // Importa el widget de horarios
+import '../../widgets/calendario.dart'; // Importa el widget de calendario
 
 class HomeMobile extends StatefulWidget {
   const HomeMobile({super.key});
@@ -36,6 +40,35 @@ class HomeMobileState extends State<HomeMobile> {
       _searchController.clear();
       _currentBody = const MainContent(); // Cambia al contenido principal
     });
+  }
+
+  void _showChats() {
+    setState(() {
+      _isSearching = false;
+      _searchController.clear();
+      _currentBody = ChatsWidget(); // Cambia al widget de chats
+    });
+  }
+
+  void _showGruposTrabajo() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const GruposTrabajoWidget()),
+    );
+  }
+
+  void _showHorarios() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HorariosWidget()),
+    );
+  }
+
+  void _showCalendario() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const CalendarioWidget()),
+    );
   }
 
   @override
@@ -107,19 +140,38 @@ class HomeMobileState extends State<HomeMobile> {
                   Navigator.of(context).pop(); // Cierra el Drawer
                 },
               ),
-              const ListTile(
-                leading: Icon(Icons.calendar_today),
-                title: Text('Horarios'),
+              ListTile(
+                leading: const Icon(Icons.calendar_today),
+                title: const Text('Horarios'),
+                onTap: () {
+                  Navigator.of(context).pop(); // Cierra el Drawer
+                  _showHorarios(); // Navega al widget de horarios
+                },
               ),
-              const ListTile(
-                leading: Icon(Icons.calendar_month),
-                title: Text('Calendario'),
+              ListTile(
+                leading: const Icon(Icons.calendar_month),
+                title: const Text('Calendario'),
+                onTap: () {
+                  Navigator.of(context).pop(); // Cierra el Drawer
+                  _showCalendario(); // Navega al widget de calendario
+                },
               ),
-              const ListTile(
-                leading: Icon(Icons.group),
-                title: Text('Grupos de trabajo'),
+              ListTile(
+                leading: const Icon(Icons.group),
+                title: const Text('Grupos de trabajo'),
+                onTap: () {
+                  Navigator.of(context).pop(); // Cierra el Drawer
+                  _showGruposTrabajo(); // Navega al widget de grupos de trabajo
+                },
               ),
-              const ListTile(leading: Icon(Icons.chat), title: Text('Chats')),
+              ListTile(
+                leading: const Icon(Icons.chat),
+                title: const Text('Chats'),
+                onTap: () {
+                  _showChats(); // Cambia al widget de chats
+                  Navigator.of(context).pop(); // Cierra el Drawer
+                },
+              ),
               const ListTile(
                 leading: Icon(Icons.settings),
                 title: Text('Configuración'),
@@ -168,7 +220,7 @@ class MainContent extends StatelessWidget {
         const Padding(
           padding: EdgeInsets.all(8.0),
           child: Text(
-            'Actividades Pendientes',
+            'Materias',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
@@ -203,7 +255,7 @@ class MainContent extends StatelessWidget {
         const Padding(
           padding: EdgeInsets.all(8.0),
           child: Text(
-            'Tareas Pendientes',
+            'Actividades Pendientes',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
