@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
-import '../../widgetsDesktop/actividadess.dart';
-import '../../widgetsDesktop/materiass.dart';
-import '../../widgetsDesktop/calendarioss.dart';
-import '../../widgetsDesktop/horario.dart';
+import 'package:proyectoeducativo/widgetsDesktop/actividadess.dart';
+import 'package:proyectoeducativo/widgetsDesktop/calendarioss.dart';
+import 'package:proyectoeducativo/widgetsDesktop/materiass.dart';
+import 'package:proyectoeducativo/widgetsDesktop/horario.dart';
+import 'package:proyectoeducativo/widgetsDesktop/grupos_trabajo.dart';
 
 class HomeDesktop extends StatefulWidget {
   const HomeDesktop({super.key});
 
   @override
-  HomeDesktopState createState() => HomeDesktopState();
+  State<HomeDesktop> createState() => _HomeDesktopState();
 }
 
-class HomeDesktopState extends State<HomeDesktop> {
+class _HomeDesktopState extends State<HomeDesktop> {
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
-  Widget _currentBody = const MainContentDesktop();
+  Widget _currentBody = const MainContent();
 
   void _showMaterias() {
     setState(() {
@@ -29,6 +30,14 @@ class HomeDesktopState extends State<HomeDesktop> {
       _isSearching = false;
       _searchController.clear();
       _currentBody = const ActividadesWidget();
+    });
+  }
+
+  void _showMainContent() {
+    setState(() {
+      _isSearching = false;
+      _searchController.clear();
+      _currentBody = const MainContent();
     });
   }
 
@@ -48,18 +57,16 @@ class HomeDesktopState extends State<HomeDesktop> {
     });
   }
 
-  void _showMainContent() {
+  void _showGruposTrabajo() {
     setState(() {
       _isSearching = false;
       _searchController.clear();
-      _currentBody = const MainContentDesktop();
+      _currentBody = const GruposTrabajoPage();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
       appBar: AppBar(
         leading: Builder(
@@ -74,21 +81,23 @@ class HomeDesktopState extends State<HomeDesktop> {
             },
           ),
         ),
-        title: const Text('Inicio', style: TextStyle(fontSize: 24)),
+        title: const Text('Inicio'),
         actions: [
           IconButton(
             icon: Icon(_isSearching ? Icons.close : Icons.search),
             onPressed: () {
               setState(() {
                 _isSearching = !_isSearching;
-                if (!_isSearching) _searchController.clear();
+                if (!_isSearching) {
+                  _searchController.clear();
+                }
               });
             },
           ),
         ],
       ),
       drawer: SizedBox(
-        width: screenWidth * 0.25,
+        width: MediaQuery.of(context).size.width * 0.25,
         child: Drawer(
           child: ListView(
             padding: EdgeInsets.zero,
@@ -97,12 +106,12 @@ class HomeDesktopState extends State<HomeDesktop> {
                 decoration: BoxDecoration(color: Colors.blue),
                 child: Text(
                   'Menú de Navegación',
-                  style: TextStyle(color: Colors.white, fontSize: 28),
+                  style: TextStyle(color: Colors.white, fontSize: 24),
                 ),
               ),
               ListTile(
                 leading: const Icon(Icons.auto_stories_sharp),
-                title: const Text('Materias', style: TextStyle(fontSize: 18)),
+                title: const Text('Materias'),
                 onTap: () {
                   _showMaterias();
                   Navigator.of(context).pop();
@@ -110,39 +119,43 @@ class HomeDesktopState extends State<HomeDesktop> {
               ),
               ListTile(
                 leading: const Icon(Icons.home),
-                title: const Text('Inicio', style: TextStyle(fontSize: 18)),
+                title: const Text('Inicio'),
                 onTap: () {
                   _showMainContent();
                   Navigator.of(context).pop();
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.task),
-                title: const Text('Actividades', style: TextStyle(fontSize: 18)),
+                leading: const Icon(Icons.assignment),
+                title: const Text('Actividades'),
                 onTap: () {
                   _showActividades();
                   Navigator.of(context).pop();
                 },
               ),
               ListTile(
+                leading: const Icon(Icons.calendar_today),
+                title: const Text('Horarios'),
+                onTap: () {
+                  _showHorario();
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
                 leading: const Icon(Icons.calendar_month),
-                title: const Text('Calendario', style: TextStyle(fontSize: 18)),
+                title: const Text('Calendario'),
                 onTap: () {
                   _showCalendario();
                   Navigator.of(context).pop();
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.calendar_today),
-                title: const Text('Horarios', style: TextStyle(fontSize: 18)),
+                leading: const Icon(Icons.group),
+                title: const Text('Grupos de trabajo'),
                 onTap: () {
-                  _showHorario();
+                  _showGruposTrabajo();
                   Navigator.of(context).pop();
                 },
-              ),
-              const ListTile(
-                leading: Icon(Icons.group),
-                title: Text('Grupos de trabajo'),
               ),
               const ListTile(
                 leading: Icon(Icons.chat),
@@ -164,23 +177,18 @@ class HomeDesktopState extends State<HomeDesktop> {
         children: [
           if (_isSearching)
             Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Center(
-                child: SizedBox(
-                  width: 600,
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: const InputDecoration(
-                      hintText: 'Buscar...',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.search),
-                    ),
-                    autofocus: true,
-                    onSubmitted: (value) {
-                      print('Buscando: $value');
-                    },
-                  ),
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  hintText: 'Buscar...',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.search),
                 ),
+                autofocus: true,
+                onSubmitted: (value) {
+                  print('Buscando: $value');
+                },
               ),
             ),
           Expanded(child: _currentBody),
@@ -190,85 +198,15 @@ class HomeDesktopState extends State<HomeDesktop> {
   }
 }
 
-class MainContentDesktop extends StatelessWidget {
-  const MainContentDesktop({super.key});
+class MainContent extends StatelessWidget {
+  const MainContent({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: SizedBox(
-        width: 800,
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Actividades Pendientes',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: 180,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: 10,
-                  separatorBuilder: (_, __) => const SizedBox(width: 16),
-                  itemBuilder: (context, index) {
-                    return Container(
-                      width: 160,
-                      decoration: BoxDecoration(
-                        color: Colors.blueAccent,
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Actividad ${index + 1}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 32),
-              const Text(
-                'Tareas Pendientes',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: 20,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      height: 100,
-                      margin: const EdgeInsets.symmetric(vertical: 8.0),
-                      decoration: BoxDecoration(
-                        color: Colors.greenAccent,
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Elemento ${index + 1}',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
+      child: Text(
+        'Bienvenido a tu escritorio educativo',
+        style: Theme.of(context).textTheme.headlineMedium,
       ),
     );
   }
