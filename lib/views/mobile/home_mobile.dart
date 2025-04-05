@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:proyectoeducativo/widgets/actividades.dart';
-import '../../widgets/materias.dart'; // Importa el widget de materias
-import '../../widgets/chats.dart'; // Importa el widget de chats
+import 'package:proyectoeducativo/widgetsMobile/actividades.dart';
+import '../../widgetsMobile/materias.dart'; // Importa el widget de materias // Importa el widget de chats
 import '../../widgets/grupos_trabajo.dart'; // Importa el widget de grupos de trabajo
 import '../../widgets/horarios.dart'; // Importa el widget de horarios
 import '../../widgets/calendario.dart'; // Importa el widget de calendario
@@ -39,14 +38,6 @@ class HomeMobileState extends State<HomeMobile> {
       _isSearching = false;
       _searchController.clear();
       _currentBody = const MainContent(); // Cambia al contenido principal
-    });
-  }
-
-  void _showChats() {
-    setState(() {
-      _isSearching = false;
-      _searchController.clear();
-      _currentBody = ChatsWidget(); // Cambia al widget de chats
     });
   }
 
@@ -162,14 +153,6 @@ class HomeMobileState extends State<HomeMobile> {
                 onTap: () {
                   Navigator.of(context).pop(); // Cierra el Drawer
                   _showGruposTrabajo(); // Navega al widget de grupos de trabajo
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.chat),
-                title: const Text('Chats'),
-                onTap: () {
-                  _showChats(); // Cambia al widget de chats
-                  Navigator.of(context).pop(); // Cierra el Drawer
                 },
               ),
               const ListTile(
