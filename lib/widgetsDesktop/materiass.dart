@@ -1,86 +1,141 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter/material.dart';
-
-class MateriasWidget extends StatelessWidget {
+class MateriasWidget extends StatefulWidget {
   const MateriasWidget({super.key});
 
-  final List<Map<String, dynamic>> materias = const [
-    {
-      'nombre': 'Tópicos Avanzados de Programación',
-      'color': Color(0xFFBBDEFB),
-    },
-    {
-      'nombre': 'Principios Eléctricos y Aplicaciones Digitales',
-      'color': Color(0xFFFFCDD2),
-    },
-    {
-      'nombre': 'Ecuaciones Diferenciales',
-      'color': Color(0xFFC8E6C9),
-    },
-    {
-      'nombre': 'Inglés 4',
-      'color': Color(0xFFD1C4E9),
-    },
-    {
-      'nombre': 'Métodos Numéricos',
-      'color': Color(0xFFFFF9C4),
-    },
-    {
-      'nombre': 'Fundamentos de Base de Datos',
-      'color': Color(0xFFFFF3E0),
-    },
-    {
-      'nombre': 'Simulación',
-      'color': Color(0xFFB2EBF2),
-    },
+  @override
+  State<MateriasWidget> createState() => _MateriasWidgetState();
+}
+
+class _MateriasWidgetState extends State<MateriasWidget> {
+  final List<Map<String, dynamic>> _materias = [
+    {'nombre': 'Tópicos Avanzados de Programación', 'color': Colors.purple},
+    {'nombre': 'Principios eléctricos', 'color': Colors.blue},
+    {'nombre': 'Ecuaciones Diferenciales', 'color': Colors.green},
+    {'nombre': 'Inglés', 'color': Colors.orange},
+    {'nombre': 'Métodos Numéricos', 'color': Colors.red},
+    {'nombre': 'Bases de Datos', 'color': Colors.teal},
   ];
+
+  void _agregarOModificarMateria({int? index}) {
+    final TextEditingController controlador = TextEditingController(
+      text: index != null ? _materias[index]['nombre'] : '',
+    );
+    Color colorSeleccionado = index != null ? _materias[index]['color'] : Colors.purple;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(index != null ? 'Editar Materia' : 'Agregar Materia'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: controlador,
+              decoration: const InputDecoration(labelText: 'Nombre de la materia'),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const Text('Color: '),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: Colors.primaries.map((color) {
+                        return GestureDetector(
+                          onTap: () => setState(() => colorSeleccionado = color),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: color,
+                              border: Border.all(
+                                width: 2,
+                                color: color == colorSeleccionado ? Colors.black : Colors.transparent,
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                if (index != null) {
+                  _materias[index]['nombre'] = controlador.text;
+                  _materias[index]['color'] = colorSeleccionado;
+                } else {
+                  _materias.add({
+                    'nombre': controlador.text,
+                    'color': colorSeleccionado,
+                  });
+                }
+              });
+              Navigator.pop(context);
+            },
+            child: Text(index != null ? 'Guardar' : 'Agregar'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Materias del Semestre',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+    return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _agregarOModificarMateria(),
+        icon: const Icon(Icons.add),
+        label: const Text('Agregar Materia'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: GridView.builder(
+          itemCount: _materias.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 20,
+            mainAxisSpacing: 20,
+            childAspectRatio: 2.8,
           ),
-          const SizedBox(height: 24),
-          Expanded(
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20,
-                childAspectRatio: 2.8,
-              ),
-              itemCount: materias.length,
-              itemBuilder: (context, index) {
-                final materia = materias[index];
-                return Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          itemBuilder: (context, index) {
+            final materia = _materias[index];
+            return GestureDetector(
+              onTap: () => _agregarOModificarMateria(index: index),
+              child: Container(
+                decoration: BoxDecoration(
                   color: materia['color'],
-                  elevation: 4,
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        materia['nombre'],
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: Text(
+                    materia['nombre'],
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
                   ),
-                );
-              },
-            ),
-          ),
-        ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

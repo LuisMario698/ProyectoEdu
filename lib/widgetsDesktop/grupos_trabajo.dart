@@ -110,24 +110,24 @@ class _GruposTrabajoPageState extends State<GruposTrabajoPage>
     showDialog(
       context: context,
       builder: (_) => Dialog(
-        insetPadding: const EdgeInsets.all(40),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 100, vertical: 80),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(32.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 _notas[index]['titulo'] ?? '',
-                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
               Text(
                 _notas[index]['descripcion'] ?? '',
                 style: const TextStyle(fontSize: 18),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
               Align(
                 alignment: Alignment.bottomRight,
                 child: TextButton(
