@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:proyectoeducativo/widgets/actividades.dart';
-import '../../widgets/materias.dart'; // Importa el widget de materias
+import 'package:proyectoeducativo/widgetsMobile/actividades.dart';
+import '../../widgetsMobile/materias.dart'; // Importa el widget de materias
+import '../../widgetsMobile/main_content.dart'; // Importa el widget de contenido principal
+import '../../widgetsMobile/horario.dart'; // Importa el widget de horario
+import '../../widgetsMobile/calendario.dart'; // Importa el widget de calendario
+import '../../widgetsMobile/grupos_trabajo.dart'; // Importa el widget de grupos de trabajo
+import '../../conexion/db.dart'; // Importa el DatabaseHelper
 
 class HomeMobile extends StatefulWidget {
   const HomeMobile({super.key});
@@ -18,7 +23,7 @@ class HomeMobileState extends State<HomeMobile> {
     setState(() {
       _isSearching = false;
       _searchController.clear();
-      _currentBody = const MateriasWidget(); // Cambia al widget de materias
+      _currentBody = const MateriasWidget(); // Cambia al widget de materias de widgetsMobile
     });
   }
 
@@ -26,7 +31,31 @@ class HomeMobileState extends State<HomeMobile> {
     setState(() {
       _isSearching = false;
       _searchController.clear();
-      _currentBody = ActividadesWidget(); // Cambia al widget de materias
+      _currentBody = const ActividadesWidget(); // Cambia al widget de actividades de widgetsMobile
+    });
+  }
+
+  void _showHorario() {
+    setState(() {
+      _isSearching = false;
+      _searchController.clear();
+      _currentBody = const HorarioWidget(); // Cambia al widget de horario de widgetsMobile
+    });
+  }
+
+  void _showCalendario() {
+    setState(() {
+      _isSearching = false;
+      _searchController.clear();
+      _currentBody = const CalendarioWidget(); // Cambia al widget de calendario de widgetsMobile
+    });
+  }
+
+  void _showGruposTrabajo() {
+    setState(() {
+      _isSearching = false;
+      _searchController.clear();
+      _currentBody = const GruposTrabajoWidget(); // Cambia al widget de grupos de trabajo de widgetsMobile
     });
   }
 
@@ -36,6 +65,13 @@ class HomeMobileState extends State<HomeMobile> {
       _searchController.clear();
       _currentBody = const MainContent(); // Cambia al contenido principal
     });
+  }
+  
+  @override
+  void initState() {
+    super.initState();
+    // Inicializar con el contenido principal
+    _currentBody = const MainContent();
   }
 
   @override
@@ -107,17 +143,29 @@ class HomeMobileState extends State<HomeMobile> {
                   Navigator.of(context).pop(); // Cierra el Drawer
                 },
               ),
-              const ListTile(
-                leading: Icon(Icons.calendar_today),
-                title: Text('Horarios'),
+              ListTile(
+                leading: const Icon(Icons.calendar_today),
+                title: const Text('Horarios'),
+                onTap: () {
+                  _showHorario(); // Cambia al widget de horario
+                  Navigator.of(context).pop(); // Cierra el Drawer
+                },
               ),
-              const ListTile(
-                leading: Icon(Icons.calendar_month),
-                title: Text('Calendario'),
+              ListTile(
+                leading: const Icon(Icons.calendar_month),
+                title: const Text('Calendario'),
+                onTap: () {
+                  _showCalendario(); // Cambia al widget de calendario
+                  Navigator.of(context).pop(); // Cierra el Drawer
+                },
               ),
-              const ListTile(
-                leading: Icon(Icons.group),
-                title: Text('Grupos de trabajo'),
+              ListTile(
+                leading: const Icon(Icons.group),
+                title: const Text('Grupos de trabajo'),
+                onTap: () {
+                  _showGruposTrabajo(); // Cambia al widget de grupos de trabajo
+                  Navigator.of(context).pop(); // Cierra el Drawer
+                },
               ),
               const ListTile(leading: Icon(Icons.chat), title: Text('Chats')),
               const ListTile(
@@ -127,6 +175,17 @@ class HomeMobileState extends State<HomeMobile> {
               const ListTile(
                 leading: Icon(Icons.info),
                 title: Text('Acerca de'),
+              ),
+              ListTile(
+                leading: Icon(Icons.cleaning_services),
+                title: Text('Limpiar Base de Datos'),
+                onTap: () async {
+                  final db = DatabaseHelper();
+                  await db.limpiarBaseDeDatos();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Base de datos limpiada correctamente')),
+                  );
+                },
               ),
             ],
           ),
@@ -157,95 +216,4 @@ class HomeMobileState extends State<HomeMobile> {
   }
 }
 
-class MainContent extends StatelessWidget {
-  const MainContent({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Text(
-            'Actividades Pendientes',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ),
-        SizedBox(
-          height: 150,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: List.generate(10, (index) {
-                return Container(
-                  width: 120,
-                  margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                  decoration: BoxDecoration(
-                    color: Colors.blueAccent,
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Actividad ${index + 1}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ),
-        ),
-        const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Text(
-            'Tareas Pendientes',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(
-              right: 8,
-              left: 8,
-              top: 10,
-              bottom: 30,
-            ),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(30)),
-              child: ListView.builder(
-                itemCount: 20,
-                itemBuilder: (context, index) {
-                  return Container(
-                    height: 80,
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 4.0,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.greenAccent,
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Elemento ${index + 1}',
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
+// Fin de la clase HomeMobile

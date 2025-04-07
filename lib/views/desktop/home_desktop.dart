@@ -4,6 +4,7 @@ import 'package:proyectoeducativo/widgetsDesktop/calendarioss.dart';
 import 'package:proyectoeducativo/widgetsDesktop/materiass.dart';
 import 'package:proyectoeducativo/widgetsDesktop/horario.dart';
 import 'package:proyectoeducativo/widgetsDesktop/grupos_trabajo.dart';
+import 'package:proyectoeducativo/conexion/db.dart'; // Importación de DatabaseHelper
 
 class HomeDesktop extends StatefulWidget {
   const HomeDesktop({super.key});
@@ -168,6 +169,23 @@ class _HomeDesktopState extends State<HomeDesktop> {
               const ListTile(
                 leading: Icon(Icons.info),
                 title: Text('Acerca de'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.cleaning_services),
+                title: const Text('Limpiar Base de Datos'),
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Esta funcionalidad estará disponible próximamente'),
+                    ),
+                  );
+                  // Cuando estés listo para implementar la funcionalidad de la base de datos:
+                  // final db = DatabaseHelper();
+                  // await db.limpiarBaseDeDatos();
+                  // ScaffoldMessenger.of(context).showSnackBar(
+                  //   const SnackBar(content: Text('Base de datos limpiada correctamente')),
+                  // );
+                },
               ),
             ],
           ),
