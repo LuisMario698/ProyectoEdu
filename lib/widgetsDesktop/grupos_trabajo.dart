@@ -143,9 +143,26 @@ class _GruposTrabajoPageState extends State<GruposTrabajoPage>
   }
 
   void _eliminarNota(int index) {
-    setState(() {
-      _notas.removeAt(index);
-    });
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Eliminar Nota'),
+        content: const Text('¿Estás seguro de que deseas eliminar esta nota?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() => _notas.removeAt(index));
+              Navigator.pop(context);
+            },
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _enviarMensaje() {
@@ -239,32 +256,30 @@ class _GruposTrabajoPageState extends State<GruposTrabajoPage>
             child: ListView.builder(
               itemCount: _notas.length,
               itemBuilder: (context, index) {
-                return Dismissible(
-                  key: Key(_notas[index]['titulo']!),
-                  direction: DismissDirection.endToStart,
-                  onDismissed: (_) => _eliminarNota(index),
-                  background: Container(
-                    alignment: Alignment.centerRight,
-                    color: Colors.red,
-                    padding: const EdgeInsets.only(right: 20),
-                    child: const Icon(Icons.delete, color: Colors.white),
-                  ),
-                  child: ScaleTransition(
-                    scale: _scaleAnimation,
-                    child: Card(
-                      elevation: 3,
-                      color: Colors.grey[100],
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      child: ListTile(
-                        onTap: () => _verNota(index),
-                        leading: const Icon(Icons.note, color: Colors.indigo),
-                        title: Text(_notas[index]['titulo'] ?? ''),
-                        subtitle: Text(_notas[index]['descripcion'] ?? ''),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () => _editarNota(index),
-                        ),
+                return ScaleTransition(
+                  scale: _scaleAnimation,
+                  child: Card(
+                    elevation: 3,
+                    color: Colors.grey[100],
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: ListTile(
+                      onTap: () => _verNota(index),
+                      leading: const Icon(Icons.note, color: Colors.indigo),
+                      title: Text(_notas[index]['titulo'] ?? ''),
+                      subtitle: Text(_notas[index]['descripcion'] ?? ''),
+                      trailing: Wrap(
+                        spacing: 10,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () => _editarNota(index),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.redAccent),
+                            onPressed: () => _eliminarNota(index),
+                          ),
+                        ],
                       ),
                     ),
                   ),

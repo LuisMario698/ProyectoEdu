@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proyectoeducativo/widgetsDesktop/materia_model.dart';
-
+import 'package:proyectoeducativo/widgetsDesktop/actividad_modelo.dart';
 
 class ActividadesWidget extends StatefulWidget {
   const ActividadesWidget({super.key});
@@ -10,108 +10,93 @@ class ActividadesWidget extends StatefulWidget {
 }
 
 class _ActividadesWidgetState extends State<ActividadesWidget> {
-  final List<Map<String, dynamic>> _actividades = [
-    {
-      'materia': 'Tópicos Avanzados de Programación',
-      'titulo': 'Proyecto POO',
-      'maestro': 'José María Gerónimo',
-      'color': Colors.blue,
-    },
-    {
-      'materia': 'Métodos Numéricos',
-      'titulo': 'Tarea Interpolación',
-      'maestro': 'Anaís Burke',
-      'color': Colors.green, 
-    },
-  ];
-
-  final List<Color> _coloresDisponibles = [
-    Colors.blue,
-    Colors.green,
-    Colors.red,
-    Colors.purple,
-    Colors.orange,
-    Colors.teal,
-    Colors.brown,
-  ];
-
-  void _agregarOEditarActividad({int? index}) {
-    final tituloCtrl = TextEditingController(text: index != null ? _actividades[index]['titulo'] : '');
-    final materiaCtrl = TextEditingController(text: index != null ? _actividades[index]['materia'] : '');
-    final maestroCtrl = TextEditingController(text: index != null ? _actividades[index]['maestro'] : '');
-    Color colorSel = index != null ? _actividades[index]['color'] : _coloresDisponibles.first;
-
+  void _agregarOEditar({Actividad? actividadExistente}) {
+    final tituloCtrl = TextEditingController(text: actividadExistente?.titulo ?? '');
+    final descripcionCtrl = TextEditingController(text: actividadExistente?.descripcion ?? '');
+    String materiaSel = actividadExistente?.materia ?? listaMaterias.first.nombre;
+    final maestroCtrl = TextEditingController(text: actividadExistente?.maestro ?? '');
+    DateTime fechaSel = actividadExistente?.fecha ?? DateTime.now();
 
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text(index != null ? 'Editar Actividad' : 'Nueva Actividad'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: tituloCtrl,
-                decoration: const InputDecoration(labelText: 'Título de la actividad'),
-              ),
-              TextField(
-                controller: materiaCtrl,
-                decoration: const InputDecoration(labelText: 'Materia'),
-              ),
-              TextField(
-                controller: maestroCtrl,
-                decoration: const InputDecoration(labelText: 'Nombre del maestro'),
-              ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                children: _coloresDisponibles.map((c) {
-                  return GestureDetector(
-                    onTap: () => setState(() => colorSel = c),
-                    child: Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: c,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: c == colorSel ? Colors.black : Colors.transparent,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
+      builder: (_) => StatefulBuilder(
+        builder: (context, setModalState) => AlertDialog(
+          title: Text(actividadExistente != null ? 'Editar actividad' : 'Nueva actividad'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: tituloCtrl,
+                  decoration: const InputDecoration(labelText: 'Título'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: descripcionCtrl,
+                  maxLines: 2,
+                  decoration: const InputDecoration(labelText: 'Descripción'),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  value: materiaSel,
+                  items: listaMaterias
+                      .map((m) => DropdownMenuItem(value: m.nombre, child: Text(m.nombre)))
+                      .toList(),
+                  onChanged: (v) => setModalState(() => materiaSel = v!),
+                  decoration: const InputDecoration(labelText: 'Materia'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: maestroCtrl,
+                  decoration: const InputDecoration(labelText: 'Maestro'),
+                ),
+                const SizedBox(height: 12),
+                ListTile(
+                  title: const Text('Fecha de entrega'),
+                  subtitle: Text('${fechaSel.toLocal()}'.split(' ')[0]),
+                  trailing: const Icon(Icons.calendar_today),
+                  onTap: () async {
+                    final DateTime? picked = await showDatePicker(
+                      context: context,
+                      initialDate: fechaSel,
+                      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                      lastDate: DateTime.now().add(const Duration(days: 730)),
+                    );
+                    if (picked != null) {
+                      setModalState(() => fechaSel = picked);
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+            ElevatedButton(
+              onPressed: () {
+                final nueva = Actividad(
+                  titulo: tituloCtrl.text,
+                  descripcion: descripcionCtrl.text,
+                  materia: materiaSel,
+                  maestro: maestroCtrl.text,
+                  fecha: fechaSel,
+                  entregada: false,
+                );
+
+                setState(() {
+                  if (actividadExistente != null) {
+                    final i = listaActividades.indexOf(actividadExistente);
+                    listaActividades[i] = nueva;
+                  } else {
+                    listaActividades.add(nueva);
+                  }
+                });
+                Navigator.pop(context);
+              },
+              child: const Text('Guardar'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                if (index != null) {
-                  _actividades[index] = {
-                    'materia': materiaCtrl.text,
-                    'titulo': tituloCtrl.text,
-                    'maestro': maestroCtrl.text,
-                    'color': colorSel,
-                  };
-                } else {
-                  _actividades.add({
-                    'materia': materiaCtrl.text,
-                    'titulo': tituloCtrl.text,
-                    'maestro': maestroCtrl.text,
-                    'color': colorSel,
-                  });
-                }
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('Guardar'),
-          ),
-        ],
       ),
     );
   }
@@ -119,31 +104,33 @@ class _ActividadesWidgetState extends State<ActividadesWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text('Actividades')),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _agregarOEditarActividad(),
+        onPressed: () => _agregarOEditar(),
         icon: const Icon(Icons.add),
-        label: const Text('Nueva Actividad'),
+        label: const Text('Nueva actividad'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: ListView.builder(
-          itemCount: _actividades.length,
+          itemCount: listaActividades.length,
           itemBuilder: (context, index) {
-            final act = _actividades[index];
+            final act = listaActividades[index];
+            final color = colorDeMateria(act.materia);
             return GestureDetector(
-              onTap: () => _agregarOEditarActividad(index: index),
+              onTap: () => _agregarOEditar(actividadExistente: act),
               child: Card(
-                color: act['color'],
+                color: color,
                 elevation: 4,
                 margin: const EdgeInsets.symmetric(vertical: 10),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 child: ListTile(
                   title: Text(
-                    act['titulo'],
+                    act.titulo,
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                   subtitle: Text(
-                    '${act['materia']}  •  ${act['maestro']}',
+                    '${act.materia}  •  ${act.maestro}  •  ${act.fecha.toLocal().toString().split(" ")[0]}',
                     style: const TextStyle(color: Colors.white70),
                   ),
                   trailing: const Icon(Icons.edit, color: Colors.white),
@@ -156,3 +143,4 @@ class _ActividadesWidgetState extends State<ActividadesWidget> {
     );
   }
 }
+ 

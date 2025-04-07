@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:proyectoeducativo/widgetsDesktop/materia_model.dart';
 
+final List<Color> coloresDisponibles = [
+  Colors.redAccent,
+  Colors.green,
+  Colors.blue,
+  Colors.orange,
+  Colors.purple,
+  Colors.teal,
+  Colors.brown,
+];
 
 class MateriasWidget extends StatefulWidget {
   const MateriasWidget({super.key});
@@ -10,87 +19,84 @@ class MateriasWidget extends StatefulWidget {
 }
 
 class _MateriasWidgetState extends State<MateriasWidget> {
-  final List<Map<String, dynamic>> _materias = [
-    {'nombre': 'Tópicos Avanzados de Programación', 'color': Colors.purple},
-    {'nombre': 'Principios eléctricos', 'color': Colors.blue},
-    {'nombre': 'Ecuaciones Diferenciales', 'color': Colors.green},
-    {'nombre': 'Inglés', 'color': Colors.orange},
-    {'nombre': 'Métodos Numéricos', 'color': Colors.red},
-    {'nombre': 'Bases de Datos', 'color': Colors.teal},
-  ];
-
-  void _agregarOModificarMateria({int? index}) {
-    final TextEditingController controlador = TextEditingController(
-      text: index != null ? _materias[index]['nombre'] : '',
-    );
-    Color colorSeleccionado = index != null ? _materias[index]['color'] : Colors.purple;
+  void _agregarOModificarMateria({Materia? materiaExistente}) {
+    final nombreCtrl = TextEditingController(text: materiaExistente?.nombre ?? '');
+    Color colorSel = materiaExistente?.color ?? Colors.blue;
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(index != null ? 'Editar Materia' : 'Agregar Materia'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: controlador,
-              decoration: const InputDecoration(labelText: 'Nombre de la materia'),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                const Text('Color: '),
-                Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: Colors.primaries.map((color) {
-                        return GestureDetector(
-                          onTap: () => setState(() => colorSeleccionado = color),
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            width: 30,
-                            height: 30,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: color,
-                              border: Border.all(
-                                width: 2,
-                                color: color == colorSeleccionado ? Colors.black : Colors.transparent,
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
+      builder: (_) => StatefulBuilder(
+        builder: (context, setModalState) => AlertDialog(
+          title: Text(materiaExistente != null ? 'Editar Materia' : 'Agregar Materia'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nombreCtrl,
+                decoration: const InputDecoration(labelText: 'Nombre de la materia'),
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 8,
+                children: coloresDisponibles.map((c) {
+                  return GestureDetector(
+                    onTap: () => setModalState(() => colorSel = c),
+                    child: Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: c,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: c == colorSel ? Colors.black : Colors.transparent,
+                          width: 2,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ],
+                  );
+                }).toList(),
+              )
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+            ElevatedButton(
+              onPressed: () {
+                if (nombreCtrl.text.isNotEmpty) {
+                  setState(() {
+                    if (materiaExistente != null) {
+                      final i = listaMaterias.indexOf(materiaExistente);
+                      listaMaterias[i] = Materia(nombre: nombreCtrl.text, color: colorSel);
+                    } else {
+                      listaMaterias.add(Materia(nombre: nombreCtrl.text, color: colorSel));
+                    }
+                  });
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Guardar'),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _eliminarMateria(Materia materia) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Eliminar Materia'),
+        content: Text('¿Deseas eliminar "${materia.nombre}"?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
           ElevatedButton(
             onPressed: () {
-              setState(() {
-                if (index != null) {
-                  _materias[index]['nombre'] = controlador.text;
-                  _materias[index]['color'] = colorSeleccionado;
-                } else {
-                  _materias.add({
-                    'nombre': controlador.text,
-                    'color': colorSeleccionado,
-                  });
-                }
-              });
+              setState(() => listaMaterias.remove(materia));
               Navigator.pop(context);
             },
-            child: Text(index != null ? 'Guardar' : 'Agregar'),
-          ),
+            child: const Text('Eliminar'),
+          )
         ],
       ),
     );
@@ -99,40 +105,41 @@ class _MateriasWidgetState extends State<MateriasWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _agregarOModificarMateria(),
-        icon: const Icon(Icons.add),
-        label: const Text('Agregar Materia'),
+      appBar: AppBar(
+        title: const Text('Materias'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => _agregarOModificarMateria(),
+          )
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
-        child: GridView.builder(
-          itemCount: _materias.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 20,
-            mainAxisSpacing: 20,
-            childAspectRatio: 2.8,
-          ),
+        child: ListView.builder(
+          itemCount: listaMaterias.length,
           itemBuilder: (context, index) {
-            final materia = _materias[index];
-            return GestureDetector(
-              onTap: () => _agregarOModificarMateria(index: index),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: materia['color'],
-                  borderRadius: BorderRadius.circular(12),
+            final materia = listaMaterias[index];
+            return Card(
+              color: materia.color,
+              margin: const EdgeInsets.symmetric(vertical: 10),
+              child: ListTile(
+                title: Text(
+                  materia.nombre,
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
-                child: Center(
-                  child: Text(
-                    materia['nombre'],
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.white),
+                      onPressed: () => _agregarOModificarMateria(materiaExistente: materia),
                     ),
-                  ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.white),
+                      onPressed: () => _eliminarMateria(materia),
+                    ),
+                  ],
                 ),
               ),
             );
