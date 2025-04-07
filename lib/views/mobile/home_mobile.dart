@@ -9,6 +9,7 @@ import '../../widgetsMobile/horario.dart'; // Importa el widget de horario
 import '../../widgetsMobile/calendario.dart'; // Importa el widget de calendario
 import '../../widgetsMobile/grupos_trabajo.dart'; // Importa el widget de grupos de trabajo
 import '../../conexion/db.dart'; // Importa el DatabaseHelper
+import 'package:proyectoeducativo/views/mobile/configuracion_page.dart'; // Importa la página de configuración
 
 class HomeMobile extends StatefulWidget {
   const HomeMobile({super.key});
@@ -171,9 +172,16 @@ class HomeMobileState extends State<HomeMobile> {
                 },
               ),
               const ListTile(leading: Icon(Icons.chat), title: Text('Chats')),
-              const ListTile(
-                leading: Icon(Icons.settings),
-                title: Text('Configuración'),
+              ListTile(
+                leading: const Icon(Icons.settings),
+                title: const Text('Configuración'),
+                onTap: () {
+                  Navigator.of(context).pop(); // Cierra el Drawer
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ConfiguracionPage()),
+                  );
+                },
               ),
               const ListTile(
                 leading: Icon(Icons.info),

@@ -13,7 +13,7 @@ class NotaDetallePage extends StatefulWidget {
 
 class _NotaDetallePageState extends State<NotaDetallePage> {
   late TextEditingController _tituloController;
-  late TextEditingController _cuerpoController;
+  late TextEditingController _contenidoController;
   final DatabaseHelper _dbHelper = DatabaseHelper();
   bool _isLoading = false;
   bool _isEdited = false;
@@ -22,25 +22,25 @@ class _NotaDetallePageState extends State<NotaDetallePage> {
   void initState() {
     super.initState();
     _tituloController = TextEditingController(text: widget.nota.title);
-    _cuerpoController = TextEditingController(text: widget.nota.body);
+    _contenidoController = TextEditingController(text: widget.nota.body);
 
     // Detectar cambios en los campos
     _tituloController.addListener(_verificarCambios);
-    _cuerpoController.addListener(_verificarCambios);
+    _contenidoController.addListener(_verificarCambios);
   }
 
   @override
   void dispose() {
     _tituloController.dispose();
-    _cuerpoController.dispose();
+    _contenidoController.dispose();
     super.dispose();
   }
 
   void _verificarCambios() {
     final tituloModificado = _tituloController.text != widget.nota.title;
-    final cuerpoModificado = _cuerpoController.text != widget.nota.body;
+    final contenidoModificado = _contenidoController.text != widget.nota.body;
 
-    if ((tituloModificado || cuerpoModificado) && !_isEdited) {
+    if ((tituloModificado || contenidoModificado) && !_isEdited) {
       setState(() {
         _isEdited = true;
       });
@@ -48,7 +48,7 @@ class _NotaDetallePageState extends State<NotaDetallePage> {
   }
 
   Future<void> _guardarNota() async {
-    if (_tituloController.text.isEmpty || _cuerpoController.text.isEmpty) {
+    if (_tituloController.text.isEmpty || _contenidoController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('El título y el cuerpo no pueden estar vacíos')),
       );
@@ -64,7 +64,7 @@ class _NotaDetallePageState extends State<NotaDetallePage> {
         id: widget.nota.id,
         groupId: widget.nota.groupId,
         title: _tituloController.text,
-        body: _cuerpoController.text,
+        body: _contenidoController.text,
       );
 
       await _dbHelper.updateGroupNote(notaActualizada);
@@ -96,21 +96,66 @@ class _NotaDetallePageState extends State<NotaDetallePage> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0), // Aumenta el padding
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch, // Estira los elementos
           children: [
-            TextField(
-              controller: _tituloController,
-              decoration: const InputDecoration(labelText: 'Título'),
+            // TextField para el título
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: TextField(
+                  controller: _tituloController,
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold), // Aumenta el tamaño de la fuente
+                  decoration: const InputDecoration(
+                    labelText: 'Título',
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20), // Aumenta el espaciado
+            // TextField para el cuerpo
             Expanded(
-              child: TextField(
-                controller: _cuerpoController,
-                decoration: const InputDecoration(labelText: 'Cuerpo'),
-                maxLines: null,
-                expands: true,
-                keyboardType: TextInputType.multiline,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.3),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: TextField(
+                    controller: _contenidoController,
+                    maxLines: null,
+                    expands: true,
+                    keyboardType: TextInputType.multiline,
+                    style: const TextStyle(fontSize: 18), // Aumenta el tamaño de la fuente
+                    decoration: const InputDecoration(
+                      labelText: 'Cuerpo',
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

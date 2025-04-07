@@ -331,39 +331,31 @@ class _GrupoTrabajoPageState extends State<GrupoTrabajoPage> {
                   children: [
                     const Text(
                       'Chat del grupo',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 12),
                     Container(
                       height: 200,
                       decoration: BoxDecoration(
-                        color: Colors.grey[100],
+                        color: Colors.grey,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       padding: const EdgeInsets.all(12),
-                      child:
-                          _mensajes.isEmpty
-                              ? const Center(child: Text('No hay mensajes.'))
-                              : ListView.builder(
-                                itemCount: _mensajes.length,
-                                itemBuilder: (context, index) {
-                                  final msg = _mensajes[index];
-                                  final time = DateFormat('HH:mm').format(
-                                    DateTime.fromMillisecondsSinceEpoch(
-                                      msg.timestamp,
-                                    ),
-                                  );
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 4,
-                                    ),
-                                    child: Text('[$time] ${msg.message}'),
-                                  );
-                                },
-                              ),
+                      child: _mensajes.isEmpty
+                          ? const Center(child: Text('No hay mensajes.'))
+                          : ListView.builder(
+                              itemCount: _mensajes.length,
+                              itemBuilder: (context, index) {
+                                final msg = _mensajes[index];
+                                final time = DateFormat('HH:mm').format(
+                                  DateTime.fromMillisecondsSinceEpoch(msg.timestamp),
+                                );
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 4),
+                                  child: Text('[$time] ${msg.message}'),
+                                );
+                              },
+                            ),
                     ),
                     const SizedBox(height: 12),
                     Row(

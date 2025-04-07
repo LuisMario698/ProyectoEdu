@@ -1,40 +1,38 @@
 import 'package:flutter/material.dart';
-import 'views/desktop/home_desktop.dart';
-import 'views/mobile/home_mobile.dart';
+import 'package:proyectoeducativo/views/desktop/home_desktop.dart';
+import 'package:proyectoeducativo/views/mobile/home_mobile.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:proyectoeducativo/conexion/db.dart'; // Importar DatabaseHelper
+import 'package:proyectoeducativo/views/mobile/configuracion_page.dart';
+import 'package:proyectoeducativo/utils/mycolorplantilla.dart';
+import 'package:provider/provider.dart';
 
-void main() async {
-  // Asegurar que los widgets Flutter estén inicializados
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Inicializar la base de datos y cargar datos de ejemplo si es necesario
-  final dbHelper = DatabaseHelper();
-  try {
-    await dbHelper.inicializarDatosEjemplo();
-  } catch (e) {
-    print("Error al inicializar la base de datos: $e");
-    // No detenemos la aplicación si hay un error, pero lo registramos
-  }
-
-  runApp(const MyApp());
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ThemeProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return MaterialApp(
-      title: 'Equipos',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      debugShowCheckedModeBanner: false,
+      title: 'Plataforma Educativa',
+      theme: themeProvider.themeData,
       home: const TeamsScreen(),
     );
   }
 }
 
 class TeamsScreen extends StatelessWidget {
-  const TeamsScreen({super.key});
+  const TeamsScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
