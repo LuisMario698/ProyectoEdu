@@ -3,7 +3,8 @@ import 'package:proyectoeducativo/utils/mycolorplantilla.dart';
 import 'package:provider/provider.dart';
 
 class ThemeProvider extends ChangeNotifier {
-  ThemeData _themeData = MyColorThemes.lightTheme;
+  ThemeData _themeData =
+      MyColorThemes.modernTheme; // Tema moderno como predeterminado
 
   ThemeData get themeData => _themeData;
 
@@ -21,9 +22,7 @@ class ConfiguracionPage extends StatelessWidget {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Configuración'),
-      ),
+      appBar: AppBar(title: const Text('Configuración')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

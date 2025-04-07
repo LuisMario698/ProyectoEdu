@@ -5,16 +5,16 @@ class MyColorThemes {
     brightness: Brightness.light,
     primaryColor: const Color(0xFF6200EE), // Deep Purple 500
     hintColor: Colors.grey,
-    scaffoldBackgroundColor: Colors.white,
+    scaffoldBackgroundColor: Color(0xFFE3F2FD), // Azul claro más visible
     appBarTheme: const AppBarTheme(
       backgroundColor: Color(0xFF6200EE),
       foregroundColor: Colors.white,
     ),
     textTheme: const TextTheme(
-      bodyMedium: TextStyle(color: Colors.black),
+      bodyMedium: TextStyle(color: Colors.black87),
     ),
     radioTheme: RadioThemeData(
-      fillColor: WidgetStateColor.resolveWith((states) => const Color(0xFF6200EE)),
+      fillColor: MaterialStateColor.resolveWith((states) => const Color(0xFF6200EE)),
     ),
     listTileTheme: const ListTileThemeData(textColor: Colors.black),
     inputDecorationTheme: const InputDecorationTheme(
@@ -66,13 +66,13 @@ class MyColorThemes {
     brightness: Brightness.light,
     primaryColor: const Color(0xFF7C4DFF), // Purple 400
     hintColor: Colors.orangeAccent,
-    scaffoldBackgroundColor: const Color(0xFFF3E5F5), // Lilac 50
+    scaffoldBackgroundColor: Color(0xFFE1BEE7), // Más saturado
     appBarTheme: const AppBarTheme(
       backgroundColor: Color(0xFF7C4DFF),
       foregroundColor: Colors.white,
     ),
     textTheme: const TextTheme(
-      bodyMedium: TextStyle(color: Color(0xFF4A148C)), // Deep Purple 900
+      bodyMedium: TextStyle(color: Color(0xFF311B92)), // Color más fuerte
     ),
     radioTheme: RadioThemeData(
       fillColor: WidgetStateColor.resolveWith((states) => const Color(0xFF7C4DFF)),
@@ -92,13 +92,13 @@ class MyColorThemes {
     brightness: Brightness.light,
     primaryColor: const Color(0xFF00BCD4), // Teal 500
     hintColor: Colors.blueGrey,
-    scaffoldBackgroundColor: Colors.white,
+    scaffoldBackgroundColor: Color(0xFFE0F7FA), // Azul claro
     appBarTheme: const AppBarTheme(
       backgroundColor: Color(0xFF00BCD4),
       foregroundColor: Colors.white,
     ),
     textTheme: const TextTheme(
-      bodyMedium: TextStyle(color: Color(0xFF263238)), // Blue Grey 900
+      bodyMedium: TextStyle(color: Color(0xFF004D40)), // Teal más oscuro
     ),
     radioTheme: RadioThemeData(
       fillColor: WidgetStateColor.resolveWith((states) => const Color(0xFF00BCD4)),

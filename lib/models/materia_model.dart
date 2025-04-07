@@ -1,21 +1,41 @@
-import 'package:flutter/material.dart';
-
 class Materia {
   int? id;
   String nombre;
   String descripcion;
   String maestro;
-  int color;
+  int color; // Código de color en formato entero (0xFFRRGGBB)
 
   Materia({
     this.id,
     required this.nombre,
-    this.descripcion = "",
-    this.maestro = "",
-    this.color = 0xFF81C784, // Color verde predeterminado
+    required this.descripcion,
+    required this.maestro,
+    required this.color,
   });
 
-  // Método copyWith para crear una copia con algunas propiedades modificadas
+  // Convertir un objeto Materia a un Map para guardar en la base de datos
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'nombre': nombre,
+      'descripcion': descripcion,
+      'maestro': maestro,
+      'color': color,
+    };
+  }
+
+  // Crear un objeto Materia desde un Map obtenido de la base de datos
+  factory Materia.fromMap(Map<String, dynamic> map) {
+    return Materia(
+      id: map['id'],
+      nombre: map['nombre'],
+      descripcion: map['descripcion'],
+      maestro: map['maestro'],
+      color: map['color'],
+    );
+  }
+
+  // Método para crear una copia de la materia con algunos campos modificados
   Materia copyWith({
     int? id,
     String? nombre,
@@ -30,32 +50,5 @@ class Materia {
       maestro: maestro ?? this.maestro,
       color: color ?? this.color,
     );
-  }
-
-  // Convertir un Materia en Map
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'nombre': nombre,
-      'descripcion': descripcion,
-      'maestro': maestro,
-      'color': color,
-    };
-  }
-
-  // Convertir Map en un Materia
-  factory Materia.fromMap(Map<String, dynamic> map) {
-    return Materia(
-      id: map['id'],
-      nombre: map['nombre'],
-      descripcion: map['descripcion'] ?? "",
-      maestro: map['maestro'] ?? "",
-      color: map['color'] ?? 0xFF81C784,
-    );
-  }
-
-  // Método para obtener el objeto Color a partir del valor entero
-  Color getColor() {
-    return Color(color);
   }
 }

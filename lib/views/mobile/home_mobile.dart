@@ -19,54 +19,40 @@ class HomeMobile extends StatefulWidget {
 }
 
 class HomeMobileState extends State<HomeMobile> {
-  bool _isSearching = false;
-  final TextEditingController _searchController = TextEditingController();
   Widget _currentBody = const MainContent(); // Contenido dinámico del body
 
   void _showMaterias() {
     setState(() {
-      _isSearching = false;
-      _searchController.clear();
       _currentBody = const MateriasWidget(); // Cambia al widget de materias de widgetsMobile
     });
   }
 
   void _showActividades() {
     setState(() {
-      _isSearching = false;
-      _searchController.clear();
       _currentBody = const ActividadesWidget(); // Cambia al widget de actividades de widgetsMobile
     });
   }
 
   void _showHorario() {
     setState(() {
-      _isSearching = false;
-      _searchController.clear();
       _currentBody = const HorarioPage(); // Cambia al widget de horario de widgetsMobile
     });
   }
 
   void _showCalendario() {
     setState(() {
-      _isSearching = false;
-      _searchController.clear();
       _currentBody = const CalendarioWidget(); // Cambia al widget de calendario de widgetsMobile
     });
   }
 
   void _showGruposTrabajo() {
     setState(() {
-      _isSearching = false;
-      _searchController.clear();
       _currentBody = const GrupoTrabajoPage();
     });
   }
 
   void _showMainContent() {
     setState(() {
-      _isSearching = false;
-      _searchController.clear();
       _currentBody = const MainContent(); // Cambia al contenido principal
     });
   }
@@ -88,27 +74,12 @@ class HomeMobileState extends State<HomeMobile> {
                 icon: const Icon(Icons.menu),
                 onPressed: () {
                   setState(() {
-                    _isSearching = false;
-                    _searchController.clear();
                   });
                   Scaffold.of(context).openDrawer();
                 },
               ),
         ),
         title: const Text('Inicio'),
-        actions: [
-          IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search),
-            onPressed: () {
-              setState(() {
-                _isSearching = !_isSearching;
-                if (!_isSearching) {
-                  _searchController.clear();
-                }
-              });
-            },
-          ),
-        ],
       ),
       drawer: SizedBox(
         width: MediaQuery.of(context).size.width * 0.6,
@@ -119,17 +90,9 @@ class HomeMobileState extends State<HomeMobile> {
               const DrawerHeader(
                 decoration: BoxDecoration(color: Colors.blue),
                 child: Text(
-                  'Menú de Navegación',
-                  style: TextStyle(color: Colors.white, fontSize: 24),
+                  'Menú',
+                  style: TextStyle(color: Colors.white, fontSize: 50),
                 ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.auto_stories_sharp),
-                title: const Text('Materias'),
-                onTap: () {
-                  _showMaterias(); // Cambia al widget de materias
-                  Navigator.of(context).pop(); // Cierra el Drawer
-                },
               ),
               ListTile(
                 leading: const Icon(Icons.home),
@@ -139,6 +102,15 @@ class HomeMobileState extends State<HomeMobile> {
                   Navigator.of(context).pop(); // Cierra el Drawer
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.auto_stories_sharp),
+                title: const Text('Materias'),
+                onTap: () {
+                  _showMaterias(); // Cambia al widget de materias
+                  Navigator.of(context).pop(); // Cierra el Drawer
+                },
+              ),
+              
               ListTile(
                 leading: const Icon(Icons.home),
                 title: const Text('Actividades'),
@@ -171,7 +143,6 @@ class HomeMobileState extends State<HomeMobile> {
                   Navigator.of(context).pop(); // Cierra el Drawer
                 },
               ),
-              const ListTile(leading: Icon(Icons.chat), title: Text('Chats')),
               ListTile(
                 leading: const Icon(Icons.settings),
                 title: const Text('Configuración'),
@@ -187,39 +158,12 @@ class HomeMobileState extends State<HomeMobile> {
                 leading: Icon(Icons.info),
                 title: Text('Acerca de'),
               ),
-              ListTile(
-                leading: Icon(Icons.cleaning_services),
-                title: Text('Limpiar Base de Datos'),
-                onTap: () async {
-                  final db = DatabaseHelper();
-                  await db.limpiarBaseDeDatos();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Base de datos limpiada correctamente')),
-                  );
-                },
-              ),
             ],
           ),
         ),
       ),
       body: Column(
         children: [
-          if (_isSearching)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: _searchController,
-                decoration: const InputDecoration(
-                  hintText: 'Buscar...',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.search),
-                ),
-                autofocus: true,
-                onSubmitted: (value) {
-                  print('Buscando: $value');
-                },
-              ),
-            ),
           Expanded(child: _currentBody),
         ],
       ),
