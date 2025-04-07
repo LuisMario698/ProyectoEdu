@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proyectoeducativo/views/mobile/horario_page.dart';
 import 'horario.dart';
 import 'calendario.dart';
 import 'grupos_trabajo.dart';
@@ -62,7 +63,7 @@ class MainContent extends StatelessWidget {
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const HorarioWidget(),
+                        builder: (context) => const HorarioPage(),
                       ),
                     );
                   },

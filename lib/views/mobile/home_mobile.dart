@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proyectoeducativo/views/mobile/horario_page.dart';
 import 'package:proyectoeducativo/widgetsMobile/actividades.dart';
 import '../../widgetsMobile/materias.dart'; // Importa el widget de materias
 import '../../widgetsMobile/main_content.dart'; // Importa el widget de contenido principal
@@ -39,7 +40,7 @@ class HomeMobileState extends State<HomeMobile> {
     setState(() {
       _isSearching = false;
       _searchController.clear();
-      _currentBody = const HorarioWidget(); // Cambia al widget de horario de widgetsMobile
+      _currentBody = const HorarioPage(); // Cambia al widget de horario de widgetsMobile
     });
   }
 

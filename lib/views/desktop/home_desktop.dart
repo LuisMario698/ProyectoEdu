@@ -54,7 +54,7 @@ class _HomeDesktopState extends State<HomeDesktop> {
     setState(() {
       _isSearching = false;
       _searchController.clear();
-      _currentBody = const HorarioWidget();
+      _currentBody = const HorarioWidget(); // Mantener HorarioWidget para escritorio
     });
   }
 

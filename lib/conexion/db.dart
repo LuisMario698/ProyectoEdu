@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/materia_model.dart';
 import '../models/actividad_model.dart';
+import '../models/horario_model.dart'; // Verifica que esta importación exista
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -20,10 +21,10 @@ class DatabaseHelper {
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'materias_database.db');
     
-    // Simplemente abrir la base de datos existente o crearla si no existe
+    // Incrementar la versión a 3 para forzar la creación de la tabla horario
     return await openDatabase(
       path,
-      version: 2,
+      version: 3, // Cambiado de 2 a 3 para forzar la actualización
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -69,6 +70,29 @@ class DatabaseHelper {
         await db.execute('ALTER TABLE materias ADD COLUMN color INTEGER DEFAULT 0xFF81C784');
       }
     }
+
+    // Cambiamos el if para que se ejecute siempre que la versión sea menor a 3
+    if (oldVersion < 3) {
+      // Verificar si la tabla 'horario' existe
+      var tables = await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='horario'");
+      if (tables.isEmpty) {
+        print("Creando tabla horario...");
+        // Crear la tabla de horario si no existe
+        await db.execute(
+          '''CREATE TABLE horario(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            materiaId INTEGER,
+            materia TEXT,
+            dia TEXT,
+            horaInicio INTEGER,
+            horaFin INTEGER,
+            color INTEGER,
+            FOREIGN KEY (materiaId) REFERENCES materias (id) ON DELETE CASCADE
+          )''',
+        );
+        print("Tabla horario creada correctamente");
+      }
+    }
     
     print("Actualización de base de datos completada");
   }
@@ -94,6 +118,21 @@ class DatabaseHelper {
         FOREIGN KEY (materiaId) REFERENCES materias (id) ON DELETE CASCADE
       )''',
     );
+
+    // Tabla de horario
+    await db.execute(
+      '''CREATE TABLE horario(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        materiaId INTEGER,
+        materia TEXT,
+        dia TEXT,
+        horaInicio INTEGER,
+        horaFin INTEGER,
+        color INTEGER,
+        FOREIGN KEY (materiaId) REFERENCES materias (id) ON DELETE CASCADE
+      )''',
+    );
+
     print("Tablas creadas correctamente");
   }
 
@@ -300,6 +339,70 @@ class DatabaseHelper {
     return maps.map((map) => map['color'] as int).toList();
   }
     
+  // Métodos CRUD para el Horario
+
+  // Insertar una nueva clase en el horario
+  Future<int> insertHorarioClase(HorarioClase clase) async {
+    final db = await database;
+    return await db.insert('horario', clase.toMap());
+  }
+
+  // Obtener todas las clases del horario
+  Future<List<HorarioClase>> getHorarioClases() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('horario');
+    
+    return List.generate(maps.length, (i) {
+      return HorarioClase.fromMap(maps[i]);
+    });
+  }
+
+  // Obtener clases del horario para un día específico
+  Future<List<HorarioClase>> getHorarioClasesPorDia(String dia) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'horario',
+      where: 'dia = ?',
+      whereArgs: [dia],
+      orderBy: 'horaInicio ASC',  // Ordenar por hora de inicio
+    );
+    
+    return List.generate(maps.length, (i) {
+      return HorarioClase.fromMap(maps[i]);
+    });
+  }
+
+  // Actualizar una clase del horario
+  Future<int> updateHorarioClase(HorarioClase clase) async {
+    final db = await database;
+    return await db.update(
+      'horario',
+      clase.toMap(),
+      where: 'id = ?',
+      whereArgs: [clase.id],
+    );
+  }
+
+  // Eliminar una clase del horario
+  Future<int> deleteHorarioClase(int id) async {
+    final db = await database;
+    return await db.delete(
+      'horario',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // Método para verificar tablas existentes (diagnóstico)
+  Future<List<String>> verificarTablasExistentes() async {
+    final db = await database;
+    final List<Map<String, dynamic>> tables = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type='table'",
+    );
+    
+    return tables.map((t) => t['name'] as String).toList();
+  }
+
   // Inicializar la base de datos - dejarlo vacío para no crear datos de ejemplo
   Future<void> inicializarDatosEjemplo() async {
     try {
