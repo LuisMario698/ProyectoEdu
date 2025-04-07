@@ -225,10 +225,6 @@ class _HomeDesktopState extends State<HomeDesktop> {
                   },
                 ),
                 const ListTile(
-                  leading: Icon(Icons.chat),
-                  title: Text('Chats'),
-                ),
-                const ListTile(
                   leading: Icon(Icons.info),
                   title: Text('Acerca de'),
                 ),

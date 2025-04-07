@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
-class HorarioWidget extends StatelessWidget {
+class HorarioWidget extends StatefulWidget {
   const HorarioWidget({super.key});
 
-  final List<String> horas = const [
+  @override
+  State<HorarioWidget> createState() => _HorarioWidgetState();
+}
+
+class _HorarioWidgetState extends State<HorarioWidget> {
+  Map<String, Map<String, String>> horario = {};
+
+  final List<String> dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+  final List<String> horas = [
     '7:00 - 8:00',
     '8:00 - 9:00',
     '9:00 - 10:00',
@@ -13,156 +23,193 @@ class HorarioWidget extends StatelessWidget {
     '13:00 - 14:00',
   ];
 
-  final List<String> dias = const ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
-
-  final List<List<Map<String, String>>> horario = const [
-    // Lunes
-    [
-      {'materia': 'Inglés 4', 'maestro': 'Contratación', 'contacto': 'maribel@escuela.edu.mx'},
-      {'materia': 'Ecuaciones Diferenciales', 'maestro': 'M.C. Anaís Sotelo Burke', 'contacto': 'aburke@escuela.edu.mx'},
-      {'materia': 'Fundamentos de Base de Datos', 'maestro': 'MED Diana Elizabeth López Chacón', 'contacto': 'dchacon@escuela.edu.mx'},
-      {'materia': 'Simulación', 'maestro': 'ISC Brenda Dayana Bejarano García', 'contacto': 'bdayana@escuela.edu.mx'},
-      {'materia': 'Tópicos Avanzados de Programación', 'maestro': 'ISC José María Gerónimo Pérez', 'contacto': 'jgeronimo@escuela.edu.mx'},
-      {'materia': 'Métodos Numéricos', 'maestro': 'M.C. Anaís Sotelo Burke', 'contacto': 'aburke@escuela.edu.mx'},
-      {'materia': 'Principios Eléctricos y Aplicaciones Digitales', 'maestro': 'MTIC Daniel Alonso Osuna Talamantes', 'contacto': 'dalonso@escuela.edu.mx'},
-    ],
-    // Martes
-    [
-      {'materia': 'Inglés 4', 'maestro': 'Contratación', 'contacto': 'maribel@escuela.edu.mx'},
-      {'materia': 'Ecuaciones Diferenciales', 'maestro': 'M.C. Anaís Sotelo Burke', 'contacto': 'aburke@escuela.edu.mx'},
-      {'materia': 'Fundamentos de Base de Datos', 'maestro': 'MED Diana Elizabeth López Chacón', 'contacto': 'dchacon@escuela.edu.mx'},
-      {'materia': 'Simulación', 'maestro': 'ISC Brenda Dayana Bejarano García', 'contacto': 'bdayana@escuela.edu.mx'},
-      {'materia': 'Tópicos Avanzados de Programación', 'maestro': 'ISC José María Gerónimo Pérez', 'contacto': 'jgeronimo@escuela.edu.mx'},
-      {'materia': 'Métodos Numéricos', 'maestro': 'M.C. Anaís Sotelo Burke', 'contacto': 'aburke@escuela.edu.mx'},
-      {'materia': 'Principios Eléctricos y Aplicaciones Digitales', 'maestro': 'MTIC Daniel Alonso Osuna Talamantes', 'contacto': 'dalonso@escuela.edu.mx'},
-    ],
-    // Miércoles
-    [
-      {'materia': 'Inglés 4', 'maestro': 'Contratación', 'contacto': 'maribel@escuela.edu.mx'},
-      {'materia': 'Ecuaciones Diferenciales', 'maestro': 'M.C. Anaís Sotelo Burke', 'contacto': 'aburke@escuela.edu.mx'},
-      {'materia': 'Fundamentos de Base de Datos', 'maestro': 'MED Diana Elizabeth López Chacón', 'contacto': 'dchacon@escuela.edu.mx'},
-      {'materia': 'Simulación', 'maestro': 'ISC Brenda Dayana Bejarano García', 'contacto': 'bdayana@escuela.edu.mx'},
-      {'materia': 'Tópicos Avanzados de Programación', 'maestro': 'ISC José María Gerónimo Pérez', 'contacto': 'jgeronimo@escuela.edu.mx'},
-      {'materia': 'Métodos Numéricos', 'maestro': 'M.C. Anaís Sotelo Burke', 'contacto': 'aburke@escuela.edu.mx'},
-      {'materia': 'Principios Eléctricos y Aplicaciones Digitales', 'maestro': 'MTIC Daniel Alonso Osuna Talamantes', 'contacto': 'dalonso@escuela.edu.mx'},
-    ],
-    // Jueves
-    [
-      {'materia': 'Inglés 4', 'maestro': 'Contratación', 'contacto': 'maribel@escuela.edu.mx'},
-      {'materia': 'Ecuaciones Diferenciales', 'maestro': 'M.C. Anaís Sotelo Burke', 'contacto': 'aburke@escuela.edu.mx'},
-      {'materia': 'Fundamentos de Base de Datos', 'maestro': 'MED Diana Elizabeth López Chacón', 'contacto': 'dchacon@escuela.edu.mx'},
-      {'materia': 'Simulación', 'maestro': 'ISC Brenda Dayana Bejarano García', 'contacto': 'bdayana@escuela.edu.mx'},
-      {'materia': 'Tópicos Avanzados de Programación', 'maestro': 'ISC José María Gerónimo Pérez', 'contacto': 'jgeronimo@escuela.edu.mx'},
-      {'materia': 'Métodos Numéricos', 'maestro': 'M.C. Anaís Sotelo Burke', 'contacto': 'aburke@escuela.edu.mx'},
-      {'materia': 'Principios Eléctricos y Aplicaciones Digitales', 'maestro': 'MTIC Daniel Alonso Osuna Talamantes', 'contacto': 'dalonso@escuela.edu.mx'},
-    ],
-    // Viernes
-    [
-      {'materia': 'Inglés 4', 'maestro': 'Contratación', 'contacto': 'maribel@escuela.edu.mx'},
-      {'materia': 'Ecuaciones Diferenciales', 'maestro': 'M.C. Anaís Sotelo Burke', 'contacto': 'aburke@escuela.edu.mx'},
-      {'materia': 'Fundamentos de Base de Datos', 'maestro': 'MED Diana Elizabeth López Chacón', 'contacto': 'dchacon@escuela.edu.mx'},
-      {'materia': 'Simulación', 'maestro': 'ISC Brenda Dayana Bejarano García', 'contacto': 'bdayana@escuela.edu.mx'},
-      {'materia': 'Tópicos Avanzados de Programación', 'maestro': 'ISC José María Gerónimo Pérez', 'contacto': 'jgeronimo@escuela.edu.mx'},
-      {'materia': 'Métodos Numéricos', 'maestro': 'M.C. Anaís Sotelo Burke', 'contacto': 'aburke@escuela.edu.mx'},
-      {'materia': 'Principios Eléctricos y Aplicaciones Digitales', 'maestro': 'MTIC Daniel Alonso Osuna Talamantes', 'contacto': 'dalonso@escuela.edu.mx'},
-    ],
-  ];
-
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  void initState() {
+    super.initState();
+    _cargarHorario();
+  }
+
+  Future<void> _cargarHorario() async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = prefs.getString('horarioData');
+    if (data != null) {
+      setState(() {
+        horario = Map<String, Map<String, String>>.from(json.decode(data).map(
+          (key, value) => MapEntry(
+            key,
+            Map<String, String>.from(value),
+          ),
+        ));
+      });
+    }
+  }
+
+  Future<void> _guardarHorario() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('horarioData', json.encode(horario));
+  }
+
+  Future<void> _reiniciarHorario() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('¿Reiniciar horario?'),
+        content: const Text('Esta acción eliminará todo el contenido del horario.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
+          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Reiniciar')),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      setState(() {
+        horario.clear();
+      });
+      _guardarHorario();
+    }
+  }
+
+  void _editarCelda(String key) {
+    final materiaCtrl = TextEditingController(text: horario[key]?['materia']);
+    final maestroCtrl = TextEditingController(text: horario[key]?['maestro']);
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Editar clase'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Horario de Clases (7:00 AM - 2:00 PM)',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            TextField(
+              controller: materiaCtrl,
+              decoration: const InputDecoration(labelText: 'Nombre de la clase'),
             ),
-            const SizedBox(height: 20),
-            Table(
-              defaultColumnWidth: const FixedColumnWidth(180),
-              border: TableBorder.all(color: Colors.grey.shade300),
-              children: [
-                TableRow(
-                  decoration: BoxDecoration(color: Colors.grey[300]),
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.all(12.0),
-                      child: Text('Hora', style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                    for (var dia in dias)
-                      Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Text(dia, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                  ],
-                ),
-                for (int i = 0; i < horas.length; i++)
-                  TableRow(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(horas[i]),
-                      ),
-                      for (int j = 0; j < dias.length; j++)
-                        _HorarioCelda(info: horario[j][i], color: Colors.primaries[(i + j) % Colors.primaries.length].shade100),
-                    ],
-                  ),
-              ],
+            TextField(
+              controller: maestroCtrl,
+              decoration: const InputDecoration(labelText: 'Nombre del maestro'),
             ),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                horario[key] = {
+                  'materia': materiaCtrl.text,
+                  'maestro': maestroCtrl.text,
+                };
+              });
+              _guardarHorario();
+              Navigator.pop(context);
+            },
+            child: const Text('Guardar'),
+          ),
+        ],
       ),
     );
   }
-}
-
-class _HorarioCelda extends StatefulWidget {
-  final Map<String, String> info;
-  final Color color;
-
-  const _HorarioCelda({required this.info, required this.color});
-
-  @override
-  State<_HorarioCelda> createState() => _HorarioCeldaState();
-}
-
-class _HorarioCeldaState extends State<_HorarioCelda> {
-  bool _expandido = false;
 
   @override
   Widget build(BuildContext context) {
-    if (widget.info.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    final theme = Theme.of(context);
 
-    return GestureDetector(
-      onTap: () => setState(() => _expandido = !_expandido),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.all(8),
-        height: _expandido ? 120 : 60,
-        decoration: BoxDecoration(
-          color: widget.color,
-          borderRadius: BorderRadius.circular(8),
-        ),
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              widget.info['materia'] ?? '',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+              'Horario de Clases (7:00 AM - 2:00 PM)',
+              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
-            if (_expandido) ...[
-              const SizedBox(height: 6),
-              Text(widget.info['maestro'] ?? '', style: const TextStyle(fontSize: 13)),
-              Text(widget.info['contacto'] ?? '', style: const TextStyle(fontSize: 12, color: Colors.black54)),
-            ]
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _reiniciarHorario,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text(
+                    'Reiniciar Horario',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.error,
+                    foregroundColor: theme.colorScheme.onError,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Table(
+              border: TableBorder.all(color: theme.dividerColor),
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              children: [
+                TableRow(
+                  children: [
+                    const TableCell(
+                      child: Padding(
+                        padding: EdgeInsets.all(12.0),
+                        child: Text('Hora', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                    ...dias.map((d) => Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text(
+                            d,
+                            style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                        )),
+                  ],
+                ),
+                ...horas.map((hora) {
+                  return TableRow(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Text(hora),
+                      ),
+                      ...dias.map((dia) {
+                        final key = '$dia-$hora';
+                        final data = horario[key];
+                        return GestureDetector(
+                          onTap: () => _editarCelda(key),
+                          child: Container(
+                            height: 60,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary.withOpacity(0.08),
+                            ),
+                            padding: const EdgeInsets.all(4.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  data?['materia'] ?? '',
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                if ((data?['maestro'] ?? '').isNotEmpty)
+                                  Text(
+                                    data?['maestro'] ?? '',
+                                    textAlign: TextAlign.center,
+                                    style: theme.textTheme.bodySmall,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                    ],
+                  );
+                }).toList(),
+              ],
+            ),
           ],
         ),
       ),

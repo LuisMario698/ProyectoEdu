@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'views/desktop/home_desktop.dart';
+import 'package:proyectoeducativo/widgetsDesktop/login.dart';
+
 // para actividades escritorio
 // para materias escritorio
 
@@ -18,7 +20,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Equipos',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const TeamsScreen(),
+      home: const LoginPage(),
+
     );
   }
 }
