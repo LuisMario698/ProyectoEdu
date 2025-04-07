@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:proyectoeducativo/widgetsDesktop/materia_model.dart';
+
 
 class MateriasWidget extends StatefulWidget {
   const MateriasWidget({super.key});
