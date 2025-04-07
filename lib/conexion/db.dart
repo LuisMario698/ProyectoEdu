@@ -3,6 +3,7 @@ import 'package:path/path.dart';
 import '../models/materia_model.dart';
 import '../models/actividad_model.dart';
 import '../models/horario_model.dart'; // Verifica que esta importación exista
+import '../models/calendario_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -21,10 +22,10 @@ class DatabaseHelper {
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'materias_database.db');
     
-    // Incrementar la versión a 3 para forzar la creación de la tabla horario
+    // Incrementar la versión para actualizar la estructura
     return await openDatabase(
       path,
-      version: 3, // Cambiado de 2 a 3 para forzar la actualización
+      version: 4, // Incrementado a 4 para agregar la tabla de calendario
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -93,6 +94,28 @@ class DatabaseHelper {
         print("Tabla horario creada correctamente");
       }
     }
+
+    // Actualización para agregar la tabla de eventos del calendario
+    if (oldVersion < 4) {
+      // Verificar si la tabla 'calendario_eventos' existe
+      var tables = await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='calendario_eventos'");
+      if (tables.isEmpty) {
+        print("Creando tabla calendario_eventos...");
+        // Crear la tabla de eventos del calendario si no existe
+        await db.execute(
+          '''CREATE TABLE calendario_eventos(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            titulo TEXT,
+            descripcion TEXT,
+            fecha INTEGER,
+            color INTEGER,
+            esActividad INTEGER DEFAULT 0,
+            actividadId INTEGER
+          )''',
+        );
+        print("Tabla calendario_eventos creada correctamente");
+      }
+    }
     
     print("Actualización de base de datos completada");
   }
@@ -130,6 +153,19 @@ class DatabaseHelper {
         horaFin INTEGER,
         color INTEGER,
         FOREIGN KEY (materiaId) REFERENCES materias (id) ON DELETE CASCADE
+      )''',
+    );
+
+    // Tabla de eventos del calendario
+    await db.execute(
+      '''CREATE TABLE calendario_eventos(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        titulo TEXT,
+        descripcion TEXT,
+        fecha INTEGER,
+        color INTEGER,
+        esActividad INTEGER DEFAULT 0,
+        actividadId INTEGER
       )''',
     );
 
@@ -388,6 +424,62 @@ class DatabaseHelper {
     final db = await database;
     return await db.delete(
       'horario',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // Métodos CRUD para el Calendario
+
+  // Insertar un nuevo evento en el calendario
+  Future<int> insertEventoCalendario(CalendarioEvento evento) async {
+    final db = await database;
+    return await db.insert('calendario_eventos', evento.toMap());
+  }
+
+  // Obtener todos los eventos del calendario
+  Future<List<CalendarioEvento>> getEventosCalendario() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('calendario_eventos');
+    
+    return List.generate(maps.length, (i) {
+      return CalendarioEvento.fromMap(maps[i]);
+    });
+  }
+
+  // Obtener eventos del calendario para una fecha específica
+  Future<List<CalendarioEvento>> getEventosCalendarioPorFecha(DateTime fecha) async {
+    final db = await database;
+    final inicioDia = DateTime(fecha.year, fecha.month, fecha.day).millisecondsSinceEpoch;
+    final finDia = DateTime(fecha.year, fecha.month, fecha.day, 23, 59, 59).millisecondsSinceEpoch;
+    
+    final List<Map<String, dynamic>> maps = await db.query(
+      'calendario_eventos',
+      where: 'fecha >= ? AND fecha <= ?',
+      whereArgs: [inicioDia, finDia],
+    );
+    
+    return List.generate(maps.length, (i) {
+      return CalendarioEvento.fromMap(maps[i]);
+    });
+  }
+
+  // Actualizar un evento del calendario
+  Future<int> updateEventoCalendario(CalendarioEvento evento) async {
+    final db = await database;
+    return await db.update(
+      'calendario_eventos',
+      evento.toMap(),
+      where: 'id = ?',
+      whereArgs: [evento.id],
+    );
+  }
+
+  // Eliminar un evento del calendario
+  Future<int> deleteEventoCalendario(int id) async {
+    final db = await database;
+    return await db.delete(
+      'calendario_eventos',
       where: 'id = ?',
       whereArgs: [id],
     );
