@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:proyectoeducativo/views/mobile/horario_page.dart';
+import 'package:proyectoeducativo/views/mobile/grupotrabajo_page.dart'; // Corrección del import
+import 'package:proyectoeducativo/widgetsDesktop/grupos_trabajo.dart';
 import 'horario.dart';
 import 'calendario.dart';
 import 'grupos_trabajo.dart';
@@ -87,7 +89,7 @@ class MainContent extends StatelessWidget {
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const GruposTrabajoWidget(),
+                        builder: (context) => const GrupoTrabajoPage(),
                       ),
                     );
                   },

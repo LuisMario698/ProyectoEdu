@@ -4,6 +4,7 @@ import '../models/materia_model.dart';
 import '../models/actividad_model.dart';
 import '../models/horario_model.dart'; // Verifica que esta importación exista
 import '../models/calendario_model.dart';
+import '../models/grupotrabajo_model.dart'; // Importación para el modelo de grupo de trabajo
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -21,11 +22,12 @@ class DatabaseHelper {
 
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'materias_database.db');
-    
+
     // Incrementar la versión para actualizar la estructura
     return await openDatabase(
       path,
-      version: 4, // Incrementado a 4 para agregar la tabla de calendario
+      version:
+          5, // Incrementado a 5 para agregar las tablas de grupo de trabajo
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -34,14 +36,15 @@ class DatabaseHelper {
   // Método para actualizar la estructura de la base de datos cuando cambia la versión
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     print("Actualizando base de datos de versión $oldVersion a $newVersion");
-    
+
     if (oldVersion < 2) {
       // Verificar si la tabla 'actividades' existe
-      var tables = await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='actividades'");
+      var tables = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='actividades'",
+      );
       if (tables.isEmpty) {
         // Crear la tabla de actividades si no existe
-        await db.execute(
-          '''CREATE TABLE actividades(
+        await db.execute('''CREATE TABLE actividades(
             id INTEGER PRIMARY KEY AUTOINCREMENT, 
             materiaId INTEGER, 
             nombre TEXT, 
@@ -51,36 +54,38 @@ class DatabaseHelper {
             fechaCompletado INTEGER, 
             completada INTEGER,
             FOREIGN KEY (materiaId) REFERENCES materias (id) ON DELETE CASCADE
-          )''',
-        );
+          )''');
       }
 
       // Verificar si la columna 'color' ya existe en la tabla 'materias'
       var tableInfo = await db.rawQuery("PRAGMA table_info(materias)");
       bool colorColumnExists = false;
-      
+
       for (var column in tableInfo) {
         if (column['name'] == 'color') {
           colorColumnExists = true;
           break;
         }
       }
-      
+
       // Si la columna 'color' no existe, agregarla
       if (!colorColumnExists) {
-        await db.execute('ALTER TABLE materias ADD COLUMN color INTEGER DEFAULT 0xFF81C784');
+        await db.execute(
+          'ALTER TABLE materias ADD COLUMN color INTEGER DEFAULT 0xFF81C784',
+        );
       }
     }
 
     // Cambiamos el if para que se ejecute siempre que la versión sea menor a 3
     if (oldVersion < 3) {
       // Verificar si la tabla 'horario' existe
-      var tables = await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='horario'");
+      var tables = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='horario'",
+      );
       if (tables.isEmpty) {
         print("Creando tabla horario...");
         // Crear la tabla de horario si no existe
-        await db.execute(
-          '''CREATE TABLE horario(
+        await db.execute('''CREATE TABLE horario(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             materiaId INTEGER,
             materia TEXT,
@@ -89,8 +94,7 @@ class DatabaseHelper {
             horaFin INTEGER,
             color INTEGER,
             FOREIGN KEY (materiaId) REFERENCES materias (id) ON DELETE CASCADE
-          )''',
-        );
+          )''');
         print("Tabla horario creada correctamente");
       }
     }
@@ -98,12 +102,13 @@ class DatabaseHelper {
     // Actualización para agregar la tabla de eventos del calendario
     if (oldVersion < 4) {
       // Verificar si la tabla 'calendario_eventos' existe
-      var tables = await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='calendario_eventos'");
+      var tables = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='calendario_eventos'",
+      );
       if (tables.isEmpty) {
         print("Creando tabla calendario_eventos...");
         // Crear la tabla de eventos del calendario si no existe
-        await db.execute(
-          '''CREATE TABLE calendario_eventos(
+        await db.execute('''CREATE TABLE calendario_eventos(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             titulo TEXT,
             descripcion TEXT,
@@ -111,12 +116,52 @@ class DatabaseHelper {
             color INTEGER,
             esActividad INTEGER DEFAULT 0,
             actividadId INTEGER
-          )''',
-        );
+          )''');
         print("Tabla calendario_eventos creada correctamente");
       }
     }
-    
+
+    // Actualización para agregar las tablas de grupo de trabajo
+    if (oldVersion < 5) {
+      // Tabla para el grupo de trabajo (almacena enlace de invitación)
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS group_work(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT,
+          invitationLink TEXT
+        )
+      ''');
+      // Tabla de miembros
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS group_members(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          groupId INTEGER,
+          memberName TEXT,
+          FOREIGN KEY (groupId) REFERENCES group_work(id) ON DELETE CASCADE
+        )
+      ''');
+      // Tabla de notas
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS group_notes(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          groupId INTEGER,
+          title TEXT,
+          body TEXT,
+          FOREIGN KEY (groupId) REFERENCES group_work(id) ON DELETE CASCADE
+        )
+      ''');
+      // Tabla de mensajes
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS group_messages(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          groupId INTEGER,
+          message TEXT,
+          timestamp INTEGER,
+          FOREIGN KEY (groupId) REFERENCES group_work(id) ON DELETE CASCADE
+        )
+      ''');
+    }
+
     print("Actualización de base de datos completada");
   }
 
@@ -126,10 +171,9 @@ class DatabaseHelper {
     await db.execute(
       'CREATE TABLE materias(id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT, descripcion TEXT, maestro TEXT, color INTEGER)',
     );
-    
+
     // Tabla de actividades
-    await db.execute(
-      '''CREATE TABLE actividades(
+    await db.execute('''CREATE TABLE actividades(
         id INTEGER PRIMARY KEY AUTOINCREMENT, 
         materiaId INTEGER, 
         nombre TEXT, 
@@ -139,12 +183,10 @@ class DatabaseHelper {
         fechaCompletado INTEGER, 
         completada INTEGER,
         FOREIGN KEY (materiaId) REFERENCES materias (id) ON DELETE CASCADE
-      )''',
-    );
+      )''');
 
     // Tabla de horario
-    await db.execute(
-      '''CREATE TABLE horario(
+    await db.execute('''CREATE TABLE horario(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         materiaId INTEGER,
         materia TEXT,
@@ -153,12 +195,10 @@ class DatabaseHelper {
         horaFin INTEGER,
         color INTEGER,
         FOREIGN KEY (materiaId) REFERENCES materias (id) ON DELETE CASCADE
-      )''',
-    );
+      )''');
 
     // Tabla de eventos del calendario
-    await db.execute(
-      '''CREATE TABLE calendario_eventos(
+    await db.execute('''CREATE TABLE calendario_eventos(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         titulo TEXT,
         descripcion TEXT,
@@ -166,8 +206,45 @@ class DatabaseHelper {
         color INTEGER,
         esActividad INTEGER DEFAULT 0,
         actividadId INTEGER
-      )''',
-    );
+      )''');
+
+    // Tabla para el grupo de trabajo (almacena enlace de invitación)
+    await db.execute('''
+      CREATE TABLE group_work(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        invitationLink TEXT
+      )
+    ''');
+    // Tabla de miembros
+    await db.execute('''
+      CREATE TABLE group_members(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        groupId INTEGER,
+        memberName TEXT,
+        FOREIGN KEY (groupId) REFERENCES group_work(id) ON DELETE CASCADE
+      )
+    ''');
+    // Tabla de notas
+    await db.execute('''
+      CREATE TABLE group_notes(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        groupId INTEGER,
+        title TEXT,
+        body TEXT,
+        FOREIGN KEY (groupId) REFERENCES group_work(id) ON DELETE CASCADE
+      )
+    ''');
+    // Tabla de mensajes
+    await db.execute('''
+      CREATE TABLE group_messages(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        groupId INTEGER,
+        message TEXT,
+        timestamp INTEGER,
+        FOREIGN KEY (groupId) REFERENCES group_work(id) ON DELETE CASCADE
+      )
+    ''');
 
     print("Tablas creadas correctamente");
   }
@@ -204,11 +281,7 @@ class DatabaseHelper {
   // Eliminar una materia
   Future<int> deleteMateria(int id) async {
     final db = await database;
-    return await db.delete(
-      'materias',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('materias', where: 'id = ?', whereArgs: [id]);
   }
 
   // Limpiar todas las tablas de la base de datos
@@ -216,13 +289,17 @@ class DatabaseHelper {
     final db = await database;
     try {
       // Verificar si las tablas existen antes de intentar eliminar
-      var tables = await db.query('sqlite_master',
-          where: 'type = ? AND (name = ? OR name = ?)',
-          whereArgs: ['table', 'actividades', 'materias']);
-      
+      var tables = await db.query(
+        'sqlite_master',
+        where: 'type = ? AND (name = ? OR name = ?)',
+        whereArgs: ['table', 'actividades', 'materias'],
+      );
+
       // Crear un mapa para verificar rápidamente la existencia de las tablas
-      var existingTables = Map.fromIterable(tables,
-          key: (table) => table['name'] as String);
+      var existingTables = Map.fromIterable(
+        tables,
+        key: (table) => table['name'] as String,
+      );
 
       // Eliminar registros solo si las tablas existen
       if (existingTables.containsKey('actividades')) {
@@ -250,25 +327,25 @@ class DatabaseHelper {
     }
     return null;
   }
-  
+
   // Métodos CRUD para Actividades
-  
+
   // Insertar una nueva actividad
   Future<int> insertActividad(Actividad actividad) async {
     final db = await database;
     return await db.insert('actividades', actividad.toMap());
   }
-  
+
   // Obtener todas las actividades
   Future<List<Actividad>> getActividades() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('actividades');
-    
+
     return List.generate(maps.length, (i) {
       return Actividad.fromMap(maps[i]);
     });
   }
-  
+
   // Obtener actividades por estado (pendientes, no entregadas, completadas)
   Future<List<Actividad>> getActividadesPorEstado(bool completadas) async {
     final db = await database;
@@ -277,44 +354,44 @@ class DatabaseHelper {
       where: 'completada = ?',
       whereArgs: [completadas ? 1 : 0],
     );
-    
+
     return List.generate(maps.length, (i) {
       return Actividad.fromMap(maps[i]);
     });
   }
-  
+
   // Obtener actividades no entregadas (fecha de cierre pasada y no completadas)
   Future<List<Actividad>> getActividadesNoEntregadas() async {
     final db = await database;
     final ahora = DateTime.now().millisecondsSinceEpoch;
-    
+
     final List<Map<String, dynamic>> maps = await db.query(
       'actividades',
       where: 'fechaCierre < ? AND completada = 0',
       whereArgs: [ahora],
     );
-    
+
     return List.generate(maps.length, (i) {
       return Actividad.fromMap(maps[i]);
     });
   }
-  
+
   // Obtener actividades pendientes (fecha de cierre futura y no completadas)
   Future<List<Actividad>> getActividadesPendientes() async {
     final db = await database;
     final ahora = DateTime.now().millisecondsSinceEpoch;
-    
+
     final List<Map<String, dynamic>> maps = await db.query(
       'actividades',
       where: 'fechaCierre >= ? AND completada = 0',
       whereArgs: [ahora],
     );
-    
+
     return List.generate(maps.length, (i) {
       return Actividad.fromMap(maps[i]);
     });
   }
-  
+
   // Actualizar una actividad
   Future<int> updateActividad(Actividad actividad) async {
     final db = await database;
@@ -325,17 +402,13 @@ class DatabaseHelper {
       whereArgs: [actividad.id],
     );
   }
-  
+
   // Eliminar una actividad
   Future<int> deleteActividad(int id) async {
     final db = await database;
-    return await db.delete(
-      'actividades',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('actividades', where: 'id = ?', whereArgs: [id]);
   }
-  
+
   // Marcar actividad como completada
   Future<int> marcarActividadComoCompletada(int id) async {
     final db = await database;
@@ -349,21 +422,18 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
-  
+
   // Desmarcar actividad como completada
   Future<int> desmarcarActividadComoCompletada(int id) async {
     final db = await database;
     return await db.update(
       'actividades',
-      {
-        'completada': 0,
-        'fechaCompletado': null,
-      },
+      {'completada': 0, 'fechaCompletado': null},
       where: 'id = ?',
       whereArgs: [id],
     );
   }
-  
+
   // Obtener colores en uso por las materias
   Future<List<int>> getColoresEnUso() async {
     final db = await database;
@@ -371,10 +441,10 @@ class DatabaseHelper {
       'materias',
       columns: ['color'],
     );
-    
+
     return maps.map((map) => map['color'] as int).toList();
   }
-    
+
   // Métodos CRUD para el Horario
 
   // Insertar una nueva clase en el horario
@@ -387,7 +457,7 @@ class DatabaseHelper {
   Future<List<HorarioClase>> getHorarioClases() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('horario');
-    
+
     return List.generate(maps.length, (i) {
       return HorarioClase.fromMap(maps[i]);
     });
@@ -400,9 +470,9 @@ class DatabaseHelper {
       'horario',
       where: 'dia = ?',
       whereArgs: [dia],
-      orderBy: 'horaInicio ASC',  // Ordenar por hora de inicio
+      orderBy: 'horaInicio ASC', // Ordenar por hora de inicio
     );
-    
+
     return List.generate(maps.length, (i) {
       return HorarioClase.fromMap(maps[i]);
     });
@@ -422,11 +492,7 @@ class DatabaseHelper {
   // Eliminar una clase del horario
   Future<int> deleteHorarioClase(int id) async {
     final db = await database;
-    return await db.delete(
-      'horario',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('horario', where: 'id = ?', whereArgs: [id]);
   }
 
   // Métodos CRUD para el Calendario
@@ -440,25 +506,38 @@ class DatabaseHelper {
   // Obtener todos los eventos del calendario
   Future<List<CalendarioEvento>> getEventosCalendario() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('calendario_eventos');
-    
+    final List<Map<String, dynamic>> maps = await db.query(
+      'calendario_eventos',
+    );
+
     return List.generate(maps.length, (i) {
       return CalendarioEvento.fromMap(maps[i]);
     });
   }
 
   // Obtener eventos del calendario para una fecha específica
-  Future<List<CalendarioEvento>> getEventosCalendarioPorFecha(DateTime fecha) async {
+  Future<List<CalendarioEvento>> getEventosCalendarioPorFecha(
+    DateTime fecha,
+  ) async {
     final db = await database;
-    final inicioDia = DateTime(fecha.year, fecha.month, fecha.day).millisecondsSinceEpoch;
-    final finDia = DateTime(fecha.year, fecha.month, fecha.day, 23, 59, 59).millisecondsSinceEpoch;
-    
+    final inicioDia =
+        DateTime(fecha.year, fecha.month, fecha.day).millisecondsSinceEpoch;
+    final finDia =
+        DateTime(
+          fecha.year,
+          fecha.month,
+          fecha.day,
+          23,
+          59,
+          59,
+        ).millisecondsSinceEpoch;
+
     final List<Map<String, dynamic>> maps = await db.query(
       'calendario_eventos',
       where: 'fecha >= ? AND fecha <= ?',
       whereArgs: [inicioDia, finDia],
     );
-    
+
     return List.generate(maps.length, (i) {
       return CalendarioEvento.fromMap(maps[i]);
     });
@@ -485,13 +564,117 @@ class DatabaseHelper {
     );
   }
 
+  // Métodos CRUD para Grupos
+
+  // Insertar un nuevo grupo de trabajo
+  Future<int> insertGroupWork(GroupWork group) async {
+    final db = await database;
+    return await db.insert('group_work', group.toMap());
+  }
+
+  // Obtener todos los grupos de trabajo
+  Future<List<GroupWork>> getGroupWorks() async {
+    final db = await database;
+    final res = await db.query('group_work');
+    return res.map((m) => GroupWork.fromMap(m)).toList();
+  }
+
+  // Métodos CRUD para Miembros
+
+  // Insertar un nuevo miembro en un grupo
+  Future<int> insertGroupMember(GroupMember member) async {
+    final db = await database;
+    return await db.insert('group_members', member.toMap());
+  }
+
+  // Obtener todos los miembros de un grupo
+  Future<List<GroupMember>> getGroupMembers(int groupId) async {
+    final db = await database;
+    final res = await db.query(
+      'group_members',
+      where: 'groupId = ?',
+      whereArgs: [groupId],
+    );
+    return res.map((m) => GroupMember.fromMap(m)).toList();
+  }
+
+  // Eliminar un miembro de un grupo
+  Future<int> deleteGroupMember(int memberId) async {
+    final db = await database;
+    return await db.delete(
+      'group_members',
+      where: 'id = ?',
+      whereArgs: [memberId],
+    );
+  }
+
+  // Métodos CRUD para Notas
+
+  // Insertar una nueva nota en un grupo
+  Future<int> insertGroupNote(GroupNote note) async {
+    final db = await database;
+    return await db.insert('group_notes', note.toMap());
+  }
+
+  // Obtener todas las notas de un grupo
+  Future<List<GroupNote>> getGroupNotes(int groupId) async {
+    final db = await database;
+    final res = await db.query(
+      'group_notes',
+      where: 'groupId = ?',
+      whereArgs: [groupId],
+    );
+    return res.map((m) => GroupNote.fromMap(m)).toList();
+  }
+
+  // Actualizar una nota de un grupo
+  Future<int> updateGroupNote(GroupNote note) async {
+    final db = await database;
+    return await db.update(
+      'group_notes',
+      note.toMap(),
+      where: 'id = ?',
+      whereArgs: [note.id],
+    );
+  }
+
+  // Eliminar una nota de un grupo
+  Future<int> deleteGroupNote(int noteId) async {
+    final db = await database;
+    return await db.delete(
+      'group_notes',
+      where: 'id = ?',
+      whereArgs: [noteId],
+    );
+  }
+
+  // Métodos CRUD para Mensajes
+
+  // Insertar un nuevo mensaje en un grupo
+  Future<int> insertGroupMessage(GroupMessage msg) async {
+    final db = await database;
+    return await db.insert('group_messages', msg.toMap());
+  }
+
+  // Obtener todos los mensajes de un grupo
+  Future<List<GroupMessage>> getGroupMessages(int groupId) async {
+    final db = await database;
+    final res = await db.query(
+      'group_messages',
+      where: 'groupId = ?',
+      whereArgs: [groupId],
+      orderBy: 'timestamp ASC',
+    );
+    return res.map((m) => GroupMessage.fromMap(m)).toList();
+  }
+
   // Método para verificar tablas existentes (diagnóstico)
   Future<List<String>> verificarTablasExistentes() async {
     final db = await database;
     final List<Map<String, dynamic>> tables = await db.rawQuery(
       "SELECT name FROM sqlite_master WHERE type='table'",
     );
-    
+
     return tables.map((t) => t['name'] as String).toList();
   }
 
@@ -499,15 +682,18 @@ class DatabaseHelper {
   Future<void> inicializarDatosEjemplo() async {
     try {
       print("Verificando base de datos");
-      
+
       // Simplemente verificar que la conexión funciona correctamente
       final db = await database;
-      var tables = await db.query('sqlite_master',
-          where: 'type = ? AND (name = ? OR name = ?)',
-          whereArgs: ['table', 'actividades', 'materias']);
-      
-      print("Base de datos funciona correctamente. Tablas encontradas: ${tables.length}");
-      
+      var tables = await db.query(
+        'sqlite_master',
+        where: 'type = ? AND (name = ? OR name = ?)',
+        whereArgs: ['table', 'actividades', 'materias'],
+      );
+
+      print(
+        "Base de datos funciona correctamente. Tablas encontradas: ${tables.length}",
+      );
     } catch (e) {
       print("Error al verificar la base de datos: $e");
       // No lanzamos la excepción para evitar interrumpir el inicio

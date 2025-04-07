@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:proyectoeducativo/views/mobile/horario_page.dart';
+import 'package:proyectoeducativo/views/mobile/grupotrabajo_page.dart'; // Import correcto
+import 'package:proyectoeducativo/widgetsDesktop/grupos_trabajo.dart';
 import 'package:proyectoeducativo/widgetsMobile/actividades.dart';
 import '../../widgetsMobile/materias.dart'; // Importa el widget de materias
 import '../../widgetsMobile/main_content.dart'; // Importa el widget de contenido principal
@@ -56,7 +58,7 @@ class HomeMobileState extends State<HomeMobile> {
     setState(() {
       _isSearching = false;
       _searchController.clear();
-      _currentBody = const GruposTrabajoWidget(); // Cambia al widget de grupos de trabajo de widgetsMobile
+      _currentBody = const GrupoTrabajoPage();
     });
   }
 
