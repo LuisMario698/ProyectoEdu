@@ -140,7 +140,7 @@ class HomeMobileState extends State<HomeMobile> {
                 title: const Text('Grupos de trabajo'),
                 onTap: () {
                   _showGruposTrabajo(); // Cambia al widget de grupos de trabajo
-                  Navigator.of(context).pop(); // Cierra el Drawer
+                  Navigator.of(context).pop(); 
                 },
               ),
               ListTile(
@@ -154,10 +154,7 @@ class HomeMobileState extends State<HomeMobile> {
                   );
                 },
               ),
-              const ListTile(
-                leading: Icon(Icons.info),
-                title: Text('Acerca de'),
-              ),
+              
             ],
           ),
         ),

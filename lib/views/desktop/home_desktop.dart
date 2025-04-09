@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proyectoeducativo/views/mobile/configuracion_page.dart';
 import 'package:proyectoeducativo/widgetsDesktop/actividadess.dart';
 import 'package:proyectoeducativo/widgetsDesktop/calendarioss.dart';
 import 'package:proyectoeducativo/widgetsDesktop/materiass.dart';
@@ -14,54 +15,40 @@ class HomeDesktop extends StatefulWidget {
 }
 
 class _HomeDesktopState extends State<HomeDesktop> {
-  bool _isSearching = false;
-  final TextEditingController _searchController = TextEditingController();
   Widget _currentBody = const MainContent();
 
   void _showMaterias() {
     setState(() {
-      _isSearching = false;
-      _searchController.clear();
       _currentBody = const MateriasWidget();
     });
   }
 
   void _showActividades() {
     setState(() {
-      _isSearching = false;
-      _searchController.clear();
       _currentBody = const ActividadesWidget();
     });
   }
 
   void _showMainContent() {
     setState(() {
-      _isSearching = false;
-      _searchController.clear();
       _currentBody = const MainContent();
     });
   }
 
   void _showCalendario() {
     setState(() {
-      _isSearching = false;
-      _searchController.clear();
       _currentBody = const CalendarioWidget();
     });
   }
 
   void _showHorario() {
     setState(() {
-      _isSearching = false;
-      _searchController.clear();
       _currentBody = const HorarioWidget(); // Mantener HorarioWidget para escritorio
     });
   }
 
   void _showGruposTrabajo() {
     setState(() {
-      _isSearching = false;
-      _searchController.clear();
       _currentBody = const GruposTrabajoPage();
     });
   }
@@ -70,32 +57,7 @@ class _HomeDesktopState extends State<HomeDesktop> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              setState(() {
-                _isSearching = false;
-                _searchController.clear();
-              });
-              Scaffold.of(context).openDrawer();
-            },
-          ),
-        ),
         title: const Text('Inicio'),
-        actions: [
-          IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search),
-            onPressed: () {
-              setState(() {
-                _isSearching = !_isSearching;
-                if (!_isSearching) {
-                  _searchController.clear();
-                }
-              });
-            },
-          ),
-        ],
       ),
       drawer: SizedBox(
         width: MediaQuery.of(context).size.width * 0.25,
@@ -106,8 +68,8 @@ class _HomeDesktopState extends State<HomeDesktop> {
               const DrawerHeader(
                 decoration: BoxDecoration(color: Colors.blue),
                 child: Text(
-                  'Menú de Navegación',
-                  style: TextStyle(color: Colors.white, fontSize: 24),
+                  'Menú',
+                  style: TextStyle(color: Colors.white, fontSize: 50),
                 ),
               ),
               ListTile(
@@ -158,60 +120,23 @@ class _HomeDesktopState extends State<HomeDesktop> {
                   Navigator.of(context).pop();
                 },
               ),
-              const ListTile(
-                leading: Icon(Icons.chat),
-                title: Text('Chats'),
-              ),
-              const ListTile(
-                leading: Icon(Icons.settings),
-                title: Text('Configuración'),
-              ),
-              const ListTile(
-                leading: Icon(Icons.info),
-                title: Text('Acerca de'),
-              ),
               ListTile(
-                leading: const Icon(Icons.cleaning_services),
-                title: const Text('Limpiar Base de Datos'),
+                leading: const Icon(Icons.settings),
+                title: const Text('Configuración'),
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Esta funcionalidad estará disponible próximamente'),
-                    ),
+                  Navigator.of(context).pop(); // Cierra el Drawer
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ConfiguracionPage()),
                   );
-                  // Cuando estés listo para implementar la funcionalidad de la base de datos:
-                  // final db = DatabaseHelper();
-                  // await db.limpiarBaseDeDatos();
-                  // ScaffoldMessenger.of(context).showSnackBar(
-                  //   const SnackBar(content: Text('Base de datos limpiada correctamente')),
-                  // );
                 },
               ),
+              
             ],
           ),
         ),
       ),
-      body: Column(
-        children: [
-          if (_isSearching)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: _searchController,
-                decoration: const InputDecoration(
-                  hintText: 'Buscar...',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.search),
-                ),
-                autofocus: true,
-                onSubmitted: (value) {
-                  print('Buscando: $value');
-                },
-              ),
-            ),
-          Expanded(child: _currentBody),
-        ],
-      ),
+      body: _currentBody,
     );
   }
 }

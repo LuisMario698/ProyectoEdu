@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:proyectoeducativo/views/desktop/home_desktop.dart';
-import 'package:proyectoeducativo/views/mobile/home_mobile.dart';
+import 'views/desktop/home_desktop.dart';
+import 'views/mobile/home_mobile.dart';
+import 'login_screen.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:proyectoeducativo/views/mobile/configuracion_page.dart';
 import 'package:proyectoeducativo/utils/mycolorplantilla.dart';
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Plataforma Educativa',
       theme: themeProvider.themeData,
-      home: const TeamsScreen(),
+      home: const LoginScreen(), 
     );
   }
 }
